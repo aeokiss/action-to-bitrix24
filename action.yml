@@ -1,0 +1,32 @@
+name: "Mention to Bitrix24 Actions"
+description: "Convert Github mention to Bitrix24 mention"
+inputs:
+  configuration-path:
+    description: "Mapping config for Github username to Bitrix24 member ID."
+    required: true
+    default: ".github/mention-to-bitrix24.yml"
+  bitrix24-webhook-url:
+    description: "Bitrix24 Incomming Webhook URL to notify."
+    required: true
+  debug-flag:
+    description: "debug flag, set true to show debug info."
+    required: false
+    default: "false"
+  repo-token:
+    description: "Github access token to fetch .github/mention-to-bitrix24.yml file."
+    required: true
+  bot-name:
+    description: "Display name for this bot on Bitrix24."
+    required: false
+  icon-url:
+    description: "Display icon url for this bot on Bitrix24."
+    required: false
+  run-id:
+    description: "Used for the link in the error message when an error occurs."
+    required: false
+runs:
+  using: "node12"
+  main: "dist/index.js"
+branding:
+  icon: "message-square"
+  color: "red"
