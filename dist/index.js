@@ -1547,6 +1547,8 @@ exports.convertToBitrix24Username = async (githubUsernames, githubClient, repoTo
     });
     return bitrix24Ids;
 };
+const quote_open = "------------------------------------------------------\n";
+const quote_close = "\n------------------------------------------------------";
 exports.markdownToBitrix24Body = async (markdown, githubClient, repoToken, configurationPath, context) => {
     var bitrix24body = markdown;
     // It may look different in bitrix24 because it is a simple character comparison, not a pattern check.
@@ -1576,7 +1578,7 @@ exports.markdownToBitrix24Body = async (markdown, githubClient, repoToken, confi
                 bitrix24body = bitrix24body.split("@" + value).join("[USER=" + bitrix24Ids[index][0] + "]" + bitrix24Ids[index][1] + "[/USER]");
         });
     }
-    bitrix24body = "------------------------------------------------------\n" + bitrix24body.trim() + "\n------------------------------------------------------";
+    bitrix24body = quote_open + bitrix24body.trim() + quote_close;
     //  bitrix24body = "[CODE]" + bitrix24body.trim() + "[/CODE]";
     //  bitrix24body = "[QUOTE]" + bitrix24body.trim() + "[/QUOTE]";
     return bitrix24body;
@@ -1607,37 +1609,37 @@ exports.execPullRequestMention = async (payload, allInputs, githubClient, bitrix
     var message = "";
     if (action === "opened" || action === "edited") {
         const body = (pull_request_body.length > 0) ? pull_request_body : "No description provided.";
-        var pr_info = "[QUOTE]";
+        var pr_info = quote_open;
         pr_info += ((changed_files > 1) ? "Changed files" : "Changed file") + " : " + changed_files.toString();
         pr_info += ", ";
         pr_info += ((commits > 1) ? "Commits" : "Commit") + " : " + commits.toString();
-        pr_info += "[/QUOTE]";
+        pr_info += quote_close;
         const bitrix24Body = await exports.markdownToBitrix24Body(body, githubClient, repoToken, configurationPath, context);
-        message = `[B]${prBitrix24UserId} has ${action} PULL REQUEST [URL=${url}]${title}[/URL] #${pull_request_number}[/B]\n${pr_info}\n${bitrix24Body}`;
+        message = `[B]${prBitrix24UserId} has ${action} PULL REQUEST [URL=${url}]${title}[/URL] \#${pull_request_number}[/B]\n${pr_info}\n${bitrix24Body}`;
     }
     else if (action == "assigned" || action == "unassigned") {
         const targetGithubId = (_k = payload.assignee) === null || _k === void 0 ? void 0 : _k.login;
         const bitrix24Ids = await exports.convertToBitrix24Username([targetGithubId], githubClient, repoToken, configurationPath, context);
-        const bitrix24Body = "[QUOTE]" + ((action == "assigned") ? "Added" : "Removed") + " : " + ((bitrix24Ids[0][0] < 0) ? "@" + targetGithubId : "[USER=" + bitrix24Ids[0][0] + "]" + bitrix24Ids[0][1] + "[/USER]") + "[/QUOTE]";
-        message = `[B]${prBitrix24UserId} has ${action} PULL REQUEST [URL=${url}]${title}[/URL] #${pull_request_number}[/B]\n${bitrix24Body}`;
+        const bitrix24Body = quote_open + ((action == "assigned") ? "Added" : "Removed") + " : " + ((bitrix24Ids[0][0] < 0) ? "@" + targetGithubId : "[USER=" + bitrix24Ids[0][0] + "]" + bitrix24Ids[0][1] + "[/USER]") + quote_close;
+        message = `[B]${prBitrix24UserId} has ${action} PULL REQUEST [URL=${url}]${title}[/URL] \#${pull_request_number}[/B]\n${bitrix24Body}`;
     }
     else if (action == "closed") {
         if (merged == true) { // the pull request was merged.
             const pr_from = (_m = (_l = payload.pull_request) === null || _l === void 0 ? void 0 : _l.head) === null || _m === void 0 ? void 0 : _m.ref;
             const pr_into = (_p = (_o = payload.pull_request) === null || _o === void 0 ? void 0 : _o.base) === null || _p === void 0 ? void 0 : _p.ref;
-            var pr_info = "[QUOTE]";
+            var pr_info = quote_open;
             pr_info += ((changed_files > 1) ? "Changed files" : "Changed file") + " : " + changed_files.toString();
             pr_info += ", ";
             pr_info += ((commits > 1) ? "Commits" : "Commit") + " : " + commits.toString();
-            pr_info += "[/QUOTE]";
-            message = `[B]${prBitrix24UserId} has merged PULL REQUEST into [highlight]${pr_into}[/highlight] from [highlight]${pr_from}[/highlight] [URL=${url}]${title}[/URL] #${pull_request_number}[B]\n${pr_info}`;
+            pr_info += quote_close;
+            message = `[B]${prBitrix24UserId} has merged PULL REQUEST into [highlight]${pr_into}[/highlight] from [highlight]${pr_from}[/highlight] [URL=${url}]${title}[/URL] \#${pull_request_number}[B]\n${pr_info}`;
         }
         else { // the pull request was closed with unmerged commits.
-            message = `[B]${prBitrix24UserId} has ${action} PULL REQUEST with unmerged commits [URL=${url}]${title}[/URL] #${pull_request_number}[/B]`;
+            message = `[B]${prBitrix24UserId} has ${action} PULL REQUEST with unmerged commits [URL=${url}]${title}[/URL] \#${pull_request_number}[/B]`;
         }
     }
     else {
-        message = `[B]${prBitrix24UserId} has ${action} PULL REQUEST [URL=${url}]${title}[/URL] #${pull_request_number}[/B]`;
+        message = `[B]${prBitrix24UserId} has ${action} PULL REQUEST [URL=${url}]${title}[/URL] \#${pull_request_number}[/B]`;
     }
     console.log(message);
     const { bitrix24WebhookUrl, chatId, botName } = allInputs;
@@ -1685,7 +1687,7 @@ exports.execPrReviewRequestedCommentMention = async (payload, allInputs, githubC
         comment_as_quote += (">" + line);
       })
     */
-    const comment_as_quote = "[QUOTE]" + comment_body + "/[QUOTE]";
+    const comment_as_quote = quote_open + comment_body.trim() + quote_close;
     const message = `[B]${commentBitrix24UserId} has ${action} a COMMENT on a ${pr_state} PULL REQUEST ${pullRequestedBitrix24UserId} ${pr_title}[/B]\n${comment_as_quote}\n${comment_url}`;
     core.warning(message);
     const { bitrix24WebhookUrl, chatId, botName } = allInputs;
@@ -1805,7 +1807,7 @@ exports.execIssueMention = async (payload, allInputs, githubClient, bitrix24Clie
     else if (action == "assigned" || action == "unassigned") {
         const targetGithubId = (_e = payload.assignee) === null || _e === void 0 ? void 0 : _e.login;
         const bitrix24Ids = await exports.convertToBitrix24Username([targetGithubId], githubClient, repoToken, configurationPath, context);
-        const bitrix24Body = "[QUOTE]" + ((action == "assigned") ? "Added" : "Removed") + " : " + ((bitrix24Ids[0][0] < 0) ? "@" + targetGithubId : "[USER=" + bitrix24Ids[0][0] + "]" + bitrix24Ids[0][1] + "[/USER]") + "[/QUOTE]";
+        const bitrix24Body = quote_open + ((action == "assigned") ? "Added" : "Removed") + " : " + ((bitrix24Ids[0][0] < 0) ? "@" + targetGithubId : "[USER=" + bitrix24Ids[0][0] + "]" + bitrix24Ids[0][1] + "[/USER]") + quote_close;
         message = `[B]${issueBitrix24UserId} has ${action} an ISSUE [URL=${issue_url}]${issue_title}[/URL][/B]\n${bitrix24Body}`;
     }
     else {
@@ -1857,7 +1859,7 @@ exports.execIssueCommentMention = async (payload, allInputs, githubClient, bitri
         comment_as_quote += (">" + line);
       })
     */
-    const comment_as_quote = "[QUOTE]" + comment_body + "[/QUOTE]";
+    const comment_as_quote = quote_open + comment_body.trim() + quote_close;
     const message = `[B]${commentBitrix24UserId} has ${action} a COMMENT on a ${issue_state} ISSUE ${issueBitrix24UserId} ${issue_title}[/B]\n${comment_as_quote}\n${comment_url}`;
     core.warning(message);
     const { bitrix24WebhookUrl, chatId, botName } = allInputs;
@@ -14262,7 +14264,7 @@ exports.Bitrix24RepositoryImpl = {
         var params = "CHAT_ID=" + (options === null || options === void 0 ? void 0 : options.chatId);
         params += "&URL_PREVIEW=N";
         //    params += "&SYSTEM=N"
-        const url = webhookUrl + page + "?" + params + "&MESSAGE=" + encodeURI("[B]" + botName + "[/B]\n" + message);
+        const url = webhookUrl + page + "?" + params + "&MESSAGE=" + encodeURI("[B][" + botName + "][/B]\n" + message);
         await axios_1.default.get(url);
         //    await axios.post(webhookUrl, JSON.stringify(bitrix24PostParam), {
         //      headers: { "Content-Type": "application/json" },

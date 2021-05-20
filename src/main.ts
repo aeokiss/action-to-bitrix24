@@ -49,6 +49,9 @@ export const convertToBitrix24Username = async (
   return bitrix24Ids;
 };
 
+const quote_open = "------------------------------------------------------\n";
+const quote_close = "\n------------------------------------------------------";
+
 export const markdownToBitrix24Body = async (
   markdown: string,
   githubClient: typeof GithubRepositoryImpl,
@@ -94,7 +97,7 @@ export const markdownToBitrix24Body = async (
     })
   }
 
-  bitrix24body = "------------------------------------------------------\n" + bitrix24body.trim() + "\n------------------------------------------------------";
+  bitrix24body = quote_open + bitrix24body.trim() + quote_close;
 //  bitrix24body = "[CODE]" + bitrix24body.trim() + "[/CODE]";
 //  bitrix24body = "[QUOTE]" + bitrix24body.trim() + "[/QUOTE]";
 
@@ -142,11 +145,11 @@ export const execPullRequestMention = async (
   var message = "";
   if (action === "opened" || action === "edited") {
     const body = (pull_request_body.length > 0) ? pull_request_body : "No description provided.";
-    var pr_info = "[QUOTE]";
+    var pr_info = quote_open;
     pr_info += ((changed_files > 1) ? "Changed files" : "Changed file") + " : " + changed_files.toString();
     pr_info += ", ";
     pr_info += ((commits > 1) ? "Commits" : "Commit") + " : " + commits.toString();
-    pr_info += "[/QUOTE]";
+    pr_info += quote_close;
     const bitrix24Body = await markdownToBitrix24Body(
       body,
       githubClient,
@@ -154,7 +157,7 @@ export const execPullRequestMention = async (
       configurationPath,
       context
     );
-    message = `[B]${prBitrix24UserId} has ${action} PULL REQUEST [URL=${url}]${title}[/URL] #${pull_request_number}[/B]\n${pr_info}\n${bitrix24Body}`;
+    message = `[B]${prBitrix24UserId} has ${action} PULL REQUEST [URL=${url}]${title}[/URL] \#${pull_request_number}[/B]\n${pr_info}\n${bitrix24Body}`;
   }
   else if (action == "assigned" || action == "unassigned") {
     const targetGithubId = payload.assignee?.login as string;
@@ -165,26 +168,26 @@ export const execPullRequestMention = async (
       configurationPath,
       context
     );
-    const bitrix24Body = "[QUOTE]" + ((action == "assigned") ? "Added" : "Removed") + " : " + ((bitrix24Ids[0][0] < 0) ? "@" + targetGithubId : "[USER=" + bitrix24Ids[0][0] + "]" + bitrix24Ids[0][1] + "[/USER]") + "[/QUOTE]";
-    message = `[B]${prBitrix24UserId} has ${action} PULL REQUEST [URL=${url}]${title}[/URL] #${pull_request_number}[/B]\n${bitrix24Body}`;
+    const bitrix24Body = quote_open + ((action == "assigned") ? "Added" : "Removed") + " : " + ((bitrix24Ids[0][0] < 0) ? "@" + targetGithubId : "[USER=" + bitrix24Ids[0][0] + "]" + bitrix24Ids[0][1] + "[/USER]") + quote_close;
+    message = `[B]${prBitrix24UserId} has ${action} PULL REQUEST [URL=${url}]${title}[/URL] \#${pull_request_number}[/B]\n${bitrix24Body}`;
   }
   else if (action == "closed") {
     if (merged == true) { // the pull request was merged.
       const pr_from = payload.pull_request?.head?.ref as string;
       const pr_into = payload.pull_request?.base?.ref as string;
-      var pr_info = "[QUOTE]";
+      var pr_info = quote_open;
       pr_info += ((changed_files > 1) ? "Changed files" : "Changed file") + " : " + changed_files.toString();
       pr_info += ", ";
       pr_info += ((commits > 1) ? "Commits" : "Commit") + " : " + commits.toString();
-      pr_info += "[/QUOTE]";
-      message = `[B]${prBitrix24UserId} has merged PULL REQUEST into [highlight]${pr_into}[/highlight] from [highlight]${pr_from}[/highlight] [URL=${url}]${title}[/URL] #${pull_request_number}[B]\n${pr_info}`;
+      pr_info += quote_close;
+      message = `[B]${prBitrix24UserId} has merged PULL REQUEST into [highlight]${pr_into}[/highlight] from [highlight]${pr_from}[/highlight] [URL=${url}]${title}[/URL] \#${pull_request_number}[B]\n${pr_info}`;
     }
     else { // the pull request was closed with unmerged commits.
-      message = `[B]${prBitrix24UserId} has ${action} PULL REQUEST with unmerged commits [URL=${url}]${title}[/URL] #${pull_request_number}[/B]`;
+      message = `[B]${prBitrix24UserId} has ${action} PULL REQUEST with unmerged commits [URL=${url}]${title}[/URL] \#${pull_request_number}[/B]`;
     }
   }
   else {
-    message = `[B]${prBitrix24UserId} has ${action} PULL REQUEST [URL=${url}]${title}[/URL] #${pull_request_number}[/B]`;
+    message = `[B]${prBitrix24UserId} has ${action} PULL REQUEST [URL=${url}]${title}[/URL] \#${pull_request_number}[/B]`;
   }
 
   console.log(message);
@@ -258,7 +261,7 @@ export const execPrReviewRequestedCommentMention = async (
     comment_as_quote += (">" + line);
   })
 */
-  const comment_as_quote = "[QUOTE]" + comment_body + "/[QUOTE]";
+  const comment_as_quote = quote_open + comment_body.trim() + quote_close;
 
   const message = `[B]${commentBitrix24UserId} has ${action} a COMMENT on a ${pr_state} PULL REQUEST ${pullRequestedBitrix24UserId} ${pr_title}[/B]\n${comment_as_quote}\n${comment_url}`;
   core.warning(message)
@@ -473,7 +476,7 @@ export const execIssueMention = async (
       configurationPath,
       context
     );
-    const bitrix24Body = "[QUOTE]" + ((action == "assigned") ? "Added" : "Removed") + " : " + ((bitrix24Ids[0][0] < 0) ? "@" + targetGithubId : "[USER=" + bitrix24Ids[0][0] + "]" + bitrix24Ids[0][1] + "[/USER]") + "[/QUOTE]";
+    const bitrix24Body = quote_open + ((action == "assigned") ? "Added" : "Removed") + " : " + ((bitrix24Ids[0][0] < 0) ? "@" + targetGithubId : "[USER=" + bitrix24Ids[0][0] + "]" + bitrix24Ids[0][1] + "[/USER]") + quote_close;
     message = `[B]${issueBitrix24UserId} has ${action} an ISSUE [URL=${issue_url}]${issue_title}[/URL][/B]\n${bitrix24Body}`;
   }
   else {
@@ -551,7 +554,7 @@ export const execIssueCommentMention = async (
     comment_as_quote += (">" + line);
   })
 */
-  const comment_as_quote = "[QUOTE]" + comment_body + "[/QUOTE]";
+  const comment_as_quote = quote_open + comment_body.trim() + quote_close;
 
   const message = `[B]${commentBitrix24UserId} has ${action} a COMMENT on a ${issue_state} ISSUE ${issueBitrix24UserId} ${issue_title}[/B]\n${comment_as_quote}\n${comment_url}`;
   core.warning(message)
