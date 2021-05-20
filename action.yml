@@ -18,9 +18,9 @@ inputs:
   bot-name:
     description: "Display name for this bot on Bitrix24."
     required: false
-  icon-url:
-    description: "Display icon url for this bot on Bitrix24."
-    required: false
+  chat-id:
+    description: "CHAT_ID to send message on Bitrix24."
+    required: true
   run-id:
     description: "Used for the link in the error message when an error occurs."
     required: false
