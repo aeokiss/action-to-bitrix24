@@ -1615,13 +1615,13 @@ exports.execPullRequestMention = async (payload, allInputs, githubClient, bitrix
         pr_info += ((commits > 1) ? "Commits" : "Commit") + " : " + commits.toString();
         pr_info += quote_close;
         const bitrix24Body = await exports.markdownToBitrix24Body(body, githubClient, repoToken, configurationPath, context);
-        message = `[B]${prBitrix24UserId} has ${action} PULL REQUEST [URL=${url}]${title}[/URL] \#${pull_request_number}[/B]\n${pr_info}\n${bitrix24Body}`;
+        message = `[B]${prBitrix24UserId} has ${action} PULL REQUEST [URL=${url}]${title}[/URL] ＃${pull_request_number}[/B]\n${pr_info}\n${bitrix24Body}`;
     }
     else if (action == "assigned" || action == "unassigned") {
         const targetGithubId = (_k = payload.assignee) === null || _k === void 0 ? void 0 : _k.login;
         const bitrix24Ids = await exports.convertToBitrix24Username([targetGithubId], githubClient, repoToken, configurationPath, context);
         const bitrix24Body = quote_open + ((action == "assigned") ? "Added" : "Removed") + " : " + ((bitrix24Ids[0][0] < 0) ? "@" + targetGithubId : "[USER=" + bitrix24Ids[0][0] + "]" + bitrix24Ids[0][1] + "[/USER]") + quote_close;
-        message = `[B]${prBitrix24UserId} has ${action} PULL REQUEST [URL=${url}]${title}[/URL] \#${pull_request_number}[/B]\n${bitrix24Body}`;
+        message = `[B]${prBitrix24UserId} has ${action} PULL REQUEST [URL=${url}]${title}[/URL] ＃${pull_request_number}[/B]\n${bitrix24Body}`;
     }
     else if (action == "closed") {
         if (merged == true) { // the pull request was merged.
@@ -1632,14 +1632,14 @@ exports.execPullRequestMention = async (payload, allInputs, githubClient, bitrix
             pr_info += ", ";
             pr_info += ((commits > 1) ? "Commits" : "Commit") + " : " + commits.toString();
             pr_info += quote_close;
-            message = `[B]${prBitrix24UserId} has merged PULL REQUEST into [highlight]${pr_into}[/highlight] from [highlight]${pr_from}[/highlight] [URL=${url}]${title}[/URL] \#${pull_request_number}[B]\n${pr_info}`;
+            message = `[B]${prBitrix24UserId} has merged PULL REQUEST into [highlight]${pr_into}[/highlight] from [highlight]${pr_from}[/highlight] [URL=${url}]${title}[/URL] ＃${pull_request_number}[B]\n${pr_info}`;
         }
         else { // the pull request was closed with unmerged commits.
-            message = `[B]${prBitrix24UserId} has ${action} PULL REQUEST with unmerged commits [URL=${url}]${title}[/URL] \#${pull_request_number}[/B]`;
+            message = `[B]${prBitrix24UserId} has ${action} PULL REQUEST with unmerged commits [URL=${url}]${title}[/URL] ＃${pull_request_number}[/B]`;
         }
     }
     else {
-        message = `[B]${prBitrix24UserId} has ${action} PULL REQUEST [URL=${url}]${title}[/URL] \#${pull_request_number}[/B]`;
+        message = `[B]${prBitrix24UserId} has ${action} PULL REQUEST [URL=${url}]${title}[/URL] ＃${pull_request_number}[/B]`;
     }
     console.log(message);
     const { bitrix24WebhookUrl, chatId, botName } = allInputs;
