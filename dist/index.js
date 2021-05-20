@@ -1630,7 +1630,7 @@ exports.execPullRequestMention = async (payload, allInputs, githubClient, bitrix
             pr_info += ", ";
             pr_info += ((commits > 1) ? "Commits" : "Commit") + " : " + commits.toString();
             pr_info += "[/QUOTE]";
-            message = `*${prBitrix24UserId} has merged PULL REQUEST into [highlight]${pr_into}[/highlight] from [highlight]${pr_from}[/highlight] [URL=${url}]${title}[/URL] #${pull_request_number}*\n${pr_info}`;
+            message = `[B]${prBitrix24UserId} has merged PULL REQUEST into [highlight]${pr_into}[/highlight] from [highlight]${pr_from}[/highlight] [URL=${url}]${title}[/URL] #${pull_request_number}[B]\n${pr_info}`;
         }
         else { // the pull request was closed with unmerged commits.
             message = `[B]${prBitrix24UserId} has ${action} PULL REQUEST with unmerged commits [URL=${url}]${title}[/URL] #${pull_request_number}[/B]`;
