@@ -211,7 +211,7 @@ export const execPullRequestMention = async (
       pr_info += ", ";
       pr_info += ((commits > 1) ? "Commits" : "Commit") + " : " + commits.toString();
       pr_info += quote_close;
-      message = `${prBitrix24UserId} has merged [B]PULL REQUEST[/B] into [U]${pr_into}[/U] from [U]${pr_from}[/U] [URL=${url}]${title}[/URL] ＃${pull_request_number}\n${pr_info}\n${url}`;
+      message = `${prBitrix24UserId} has merged [B]PULL REQUEST[/B] into [I]${pr_into}[/I] from [I]${pr_from}[/I] [URL=${url}]${title}[/URL] ＃${pull_request_number}\n${pr_info}\n${url}`;
     }
     else { // the pull request was closed with unmerged commits.
       message = `${prBitrix24UserId} has ${action} [B]PULL REQUEST[/B] with unmerged commits [URL=${url}]${title}[/URL] ＃${pull_request_number}\n${url}`;
