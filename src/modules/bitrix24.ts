@@ -61,21 +61,15 @@ export type Bitrix24Option = {
   chatId?: string;
   botName?: string;
 };
-/*
-type Bitrix24PostParam = {
-  text: string;
-  link_names: 0 | 1;
-  username: string;
-  chat_id?: string;
-};
-*/
+
 const defaultBotName = "Github Mention To Bitrix24";
-//const defaultIconEmoji = ":bell:";
 
 export const Bitrix24RepositoryImpl = {
   postToBitrix24: async (
     webhookUrl: string,
     message: string,
+    notiBitrix24Ids: number[],
+    notiMessage: string,
     options?: Bitrix24Option
   ): Promise<void> => {
     const botName = (() => {
@@ -86,21 +80,20 @@ export const Bitrix24RepositoryImpl = {
       return defaultBotName;
     })();
 
-//    const bitrix24PostParam: Bitrix24PostParam = {
-//      text: message,
-//      link_names: 0,
-//      username: botName,
-//    };
+    // send message to chat
+    const chat_page = "im.message.add.json";
+//    const chat_params = "CHAT_ID=" + options?.chatId + "&URL_PREVIEW=N&SYSTEM=N";
+    const chat_params = "CHAT_ID=" + options?.chatId + "&URL_PREVIEW=N";
+    const chat_url = webhookUrl + chat_page + "?" + chat_params + "&MESSAGE=" + encodeURI("[B]" + botName + "[/B]\n" + message);
+    await axios.get(chat_url);
 
-    const page = "im.message.add.json"
-//    const params = "CHAT_ID=7047&SYSTEM=N&URL_PREVIEW=N"
-    var params = "CHAT_ID=" + options?.chatId;
-    params += "&URL_PREVIEW=N"
-//    params += "&SYSTEM=N"
-    const url = webhookUrl + page + "?" + params + "&MESSAGE=" + encodeURI("[B]" + botName + "[/B]\n" + message);
-    await axios.get(url);
-//    await axios.post(webhookUrl, JSON.stringify(bitrix24PostParam), {
-//      headers: { "Content-Type": "application/json" },
-//    });
+    // send notification
+    const noti_page = "im.notify.personal.add.json";
+    for (const value of notiBitrix24Ids) {
+      const noti_params = "USER_ID=" + value;
+      const noti_url = webhookUrl + noti_page + "?" + noti_params + "&MESSAGE=" + encodeURI(notiMessage);
+      if (value === 225) // for test (only to Tony)
+        await axios.get(noti_url);
+    };
   },
 };
