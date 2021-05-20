@@ -74,9 +74,11 @@ export const markdownToBitrix24Body = async (
     ["- [ ] ", "- □ "], // check box
 //    ["_", ""], // italic
     ["*", ""], // italic
-    ["[", "&#91;"], // [
-    ["]", "&#93;"], // ]
     ["> ", "| "], // blockquote
+    // 아래 코드가 들어갈 경우 문장이 깨지는 경우가 있어서 특수문자로 변환
+    ["[", "［"], // [
+    ["]", "］"], // ]
+    ["#", "＃"] // #
   ];
 
   mask.forEach(value => {
