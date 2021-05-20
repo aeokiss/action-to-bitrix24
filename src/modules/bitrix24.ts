@@ -101,7 +101,8 @@ export const Bitrix24RepositoryImpl = {
     }
 
     const page = "im.message.add.json"
-    const params = "CHAT_ID=7047&SYSTEM=N&URL_PREVIEW=N"
+//    const params = "CHAT_ID=7047&SYSTEM=N&URL_PREVIEW=N"
+    const params = "CHAT_ID=7047&URL_PREVIEW=N"
     const url = webhookUrl + page + "?" + params + "&MESSAGE=" + encodeURI(message);
     await axios.get(url);
 //    await axios.post(webhookUrl, JSON.stringify(bitrix24PostParam), {
