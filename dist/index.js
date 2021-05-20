@@ -1576,10 +1576,9 @@ exports.markdownToBitrix24Body = async (markdown, githubClient, repoToken, confi
                 bitrix24body = bitrix24body.split("@" + value).join("[USER=" + bitrix24Ids[index][0] + "]" + bitrix24Ids[index][1] + "[/USER]");
         });
     }
-    // body to inline code
-    //  bitrix24body = "------------------------------------------------------\n" + bitrix24body.trim() + "\n------------------------------------------------------";
+    bitrix24body = "------------------------------------------------------\n" + bitrix24body.trim() + "\n------------------------------------------------------";
     //  bitrix24body = "[CODE]" + bitrix24body.trim() + "[/CODE]";
-    bitrix24body = "[QUOTE]" + bitrix24body.trim() + "[/QUOTE]";
+    //  bitrix24body = "[QUOTE]" + bitrix24body.trim() + "[/QUOTE]";
     return bitrix24body;
 };
 // Pull Request
@@ -1608,35 +1607,37 @@ exports.execPullRequestMention = async (payload, allInputs, githubClient, bitrix
     var message = "";
     if (action === "opened" || action === "edited") {
         const body = (pull_request_body.length > 0) ? pull_request_body : "No description provided.";
-        var pr_info = ">";
+        var pr_info = "[QUOTE]";
         pr_info += ((changed_files > 1) ? "Changed files" : "Changed file") + " : " + changed_files.toString();
         pr_info += ", ";
         pr_info += ((commits > 1) ? "Commits" : "Commit") + " : " + commits.toString();
+        pr_info += "[/QUOTE]";
         const bitrix24Body = await exports.markdownToBitrix24Body(body, githubClient, repoToken, configurationPath, context);
-        message = `*${prBitrix24UserId} has ${action} PULL REQUEST <${url}|${title}> #${pull_request_number}*\n${pr_info}\n${bitrix24Body}`;
+        message = `[B]${prBitrix24UserId} has ${action} PULL REQUEST [URL=${url}]${title}[/URL] #${pull_request_number}[/B]\n${pr_info}\n${bitrix24Body}`;
     }
     else if (action == "assigned" || action == "unassigned") {
         const targetGithubId = (_k = payload.assignee) === null || _k === void 0 ? void 0 : _k.login;
         const bitrix24Ids = await exports.convertToBitrix24Username([targetGithubId], githubClient, repoToken, configurationPath, context);
-        const bitrix24Body = ">" + ((action == "assigned") ? "Added" : "Removed") + " : " + ((bitrix24Ids[0][0] < 0) ? "@" + targetGithubId : "[USER=" + bitrix24Ids[0][0] + "]" + bitrix24Ids[0][1] + "[/USER]");
-        message = `*${prBitrix24UserId} has ${action} PULL REQUEST <${url}|${title}> #${pull_request_number}*\n${bitrix24Body}`;
+        const bitrix24Body = "[QUOTE]" + ((action == "assigned") ? "Added" : "Removed") + " : " + ((bitrix24Ids[0][0] < 0) ? "@" + targetGithubId : "[USER=" + bitrix24Ids[0][0] + "]" + bitrix24Ids[0][1] + "[/USER]") + "[/QUOTE]";
+        message = `[B]${prBitrix24UserId} has ${action} PULL REQUEST [URL=${url}]${title}[/URL] #${pull_request_number}[/B]\n${bitrix24Body}`;
     }
     else if (action == "closed") {
         if (merged == true) { // the pull request was merged.
             const pr_from = (_m = (_l = payload.pull_request) === null || _l === void 0 ? void 0 : _l.head) === null || _m === void 0 ? void 0 : _m.ref;
             const pr_into = (_p = (_o = payload.pull_request) === null || _o === void 0 ? void 0 : _o.base) === null || _p === void 0 ? void 0 : _p.ref;
-            var pr_info = ">";
+            var pr_info = "[QUOTE]";
             pr_info += ((changed_files > 1) ? "Changed files" : "Changed file") + " : " + changed_files.toString();
             pr_info += ", ";
             pr_info += ((commits > 1) ? "Commits" : "Commit") + " : " + commits.toString();
-            message = `*${prBitrix24UserId} has merged PULL REQUEST into \`${pr_into}\` from \`${pr_from}\` <${url}|${title}> #${pull_request_number}*\n${pr_info}`;
+            pr_info += "[/QUOTE]";
+            message = `*${prBitrix24UserId} has merged PULL REQUEST into \`${pr_into}\` from \`${pr_from}\` [URL=${url}]${title}[/URL] #${pull_request_number}*\n${pr_info}`;
         }
         else { // the pull request was closed with unmerged commits.
-            message = `*${prBitrix24UserId} has ${action} PULL REQUEST with unmerged commits <${url}|${title}> #${pull_request_number}*`;
+            message = `[B]${prBitrix24UserId} has ${action} PULL REQUEST with unmerged commits [URL=${url}]${title}[/URL] #${pull_request_number}[/B]`;
         }
     }
     else {
-        message = `*${prBitrix24UserId} has ${action} PULL REQUEST <${url}|${title}> #${pull_request_number}*`;
+        message = `[B]${prBitrix24UserId} has ${action} PULL REQUEST [URL=${url}]${title}[/URL] #${pull_request_number}[/B]`;
     }
     console.log(message);
     const { bitrix24WebhookUrl, chatId, botName } = allInputs;
@@ -1676,13 +1677,16 @@ exports.execPrReviewRequestedCommentMention = async (payload, allInputs, githubC
         });
     }
     // show comment text as quote text.
-    const comment_lines = comment_body.split("\n");
-    var comment_as_quote = "";
-    comment_lines.forEach(line => {
-        core.warning(line);
+    /*
+      const comment_lines = comment_body.split("\n")
+      var comment_as_quote = "";
+      comment_lines.forEach(line => {
+        core.warning(line)
         comment_as_quote += (">" + line);
-    });
-    const message = `*${commentBitrix24UserId} has ${action} a COMMENT on a ${pr_state} PULL REQUEST ${pullRequestedBitrix24UserId} ${pr_title}*:\n${comment_as_quote}\n${comment_url}`;
+      })
+    */
+    const comment_as_quote = "[QUOTE]" + comment_body + "/[QUOTE]";
+    const message = `[B]${commentBitrix24UserId} has ${action} a COMMENT on a ${pr_state} PULL REQUEST ${pullRequestedBitrix24UserId} ${pr_title}[/B]\n${comment_as_quote}\n${comment_url}`;
     core.warning(message);
     const { bitrix24WebhookUrl, chatId, botName } = allInputs;
     await bitrix24Client.postToBitrix24(bitrix24WebhookUrl, message, { chatId, botName });
@@ -1707,7 +1711,7 @@ exports.execPrReviewRequestedMention = async (payload, allInputs, githubClient, 
     const url = (_e = payload.pull_request) === null || _e === void 0 ? void 0 : _e.html_url;
     const requestedBitrix24UserId = (bitrix24Ids[0][0] < 0) ? "@" + requestedGithubUsername : "[USER=" + bitrix24Ids[0][0] + "]" + bitrix24Ids[0][1] + "[/USER]";
     const requestBitrix24UserId = (bitrix24Ids[1][0] < 0) ? "@" + requestUsername : "[USER=" + bitrix24Ids[1][0] + "]" + bitrix24Ids[1][1] + "[/USER]";
-    const message = `*${requestedBitrix24UserId} has been REQUESTED to REVIEW <${url}|${title}> by ${requestBitrix24UserId}*`;
+    const message = `[B]${requestedBitrix24UserId} has been REQUESTED to REVIEW [URL=${url}]${title}[/URL] by ${requestBitrix24UserId}[/B]`;
     const { bitrix24WebhookUrl, chatId, botName } = allInputs;
     await bitrix24Client.postToBitrix24(bitrix24WebhookUrl, message, { chatId, botName });
 };
@@ -1738,9 +1742,9 @@ exports.execPullRequestReviewMention = async (payload, allInputs, githubClient, 
     const cm_state = (_k = payload.review) === null || _k === void 0 ? void 0 : _k.state;
     const bitrix24Body = await exports.markdownToBitrix24Body(body, githubClient, repoToken, configurationPath, context);
     const message = (cm_state === "approved") ?
-        `*${reviewerBitrix24UserId} has approved PULL REQUEST <${url}|${title}>, which created by ${pullRequestBitrix24UserId}*\n${review_url}`
+        `[B]${reviewerBitrix24UserId} has approved PULL REQUEST [URL=${url}]${title}[/URL], which created by ${pullRequestBitrix24UserId}[/B]\n${review_url}`
         :
-            `*${reviewerBitrix24UserId} has ${action} a REVIEW on ${state} PULL REQUEST <${url}|${title}>, which created by ${pullRequestBitrix24UserId}*\n${bitrix24Body}\n${review_url}`;
+            `[B]${reviewerBitrix24UserId} has ${action} a REVIEW on ${state} PULL REQUEST [URL=${url}]${title}[/URL], which created by ${pullRequestBitrix24UserId}[/B]\n${bitrix24Body}\n${review_url}`;
     const { bitrix24WebhookUrl, chatId, botName } = allInputs;
     await bitrix24Client.postToBitrix24(bitrix24WebhookUrl, message, { chatId, botName });
 };
@@ -1770,7 +1774,7 @@ exports.execPullRequestReviewComment = async (payload, allInputs, githubClient, 
     const comment_url = (_l = payload.comment) === null || _l === void 0 ? void 0 : _l.html_url;
     const reviewCommentBitrix24UserId = (bitrix24Ids[0][0] < 0) ? "@" + reviewerCommentUsername : "[USER=" + bitrix24Ids[0][0] + "]" + bitrix24Ids[0][1] + "[/USER]";
     const pullRequestBitrix24UserId = (bitrix24Ids[1][0] < 0) ? "@" + pullRequestUsername : "[USER=" + bitrix24Ids[1][0] + "]" + bitrix24Ids[1][1] + "[/USER]";
-    const message = `*${reviewCommentBitrix24UserId} has ${action} a COMMENT REVIEW on ${state} PULL REQUEST <${url}|${title}>, which created by ${pullRequestBitrix24UserId}*\n \n\`\`\`${changeFilePath}\n${diffHunk}\`\`\`\n${body}\n${comment_url}`;
+    const message = `[B]${reviewCommentBitrix24UserId} has ${action} a COMMENT REVIEW on ${state} PULL REQUEST [URL=${url}]${title}[/URL], which created by ${pullRequestBitrix24UserId}[/B]\n \n\`\`\`${changeFilePath}\n${diffHunk}\`\`\`\n${body}\n${comment_url}`;
     const { bitrix24WebhookUrl, chatId, botName } = allInputs;
     await bitrix24Client.postToBitrix24(bitrix24WebhookUrl, message, { chatId, botName });
 };
@@ -1801,11 +1805,11 @@ exports.execIssueMention = async (payload, allInputs, githubClient, bitrix24Clie
     else if (action == "assigned" || action == "unassigned") {
         const targetGithubId = (_e = payload.assignee) === null || _e === void 0 ? void 0 : _e.login;
         const bitrix24Ids = await exports.convertToBitrix24Username([targetGithubId], githubClient, repoToken, configurationPath, context);
-        const bitrix24Body = ">" + ((action == "assigned") ? "Added" : "Removed") + " : " + ((bitrix24Ids[0][0] < 0) ? "@" + targetGithubId : "[USER=" + bitrix24Ids[0][0] + "]" + bitrix24Ids[0][1] + "[/USER]");
-        message = `*${issueBitrix24UserId} has ${action} an ISSUE <${issue_url}|${issue_title}>*:\n${bitrix24Body}`;
+        const bitrix24Body = "[QUOTE]" + ((action == "assigned") ? "Added" : "Removed") + " : " + ((bitrix24Ids[0][0] < 0) ? "@" + targetGithubId : "[USER=" + bitrix24Ids[0][0] + "]" + bitrix24Ids[0][1] + "[/USER]") + "[/QUOTE]";
+        message = `[B]${issueBitrix24UserId} has ${action} an ISSUE [URL=${issue_url}]${issue_title}[/URL][/B]\n${bitrix24Body}`;
     }
     else {
-        message = `*${issueBitrix24UserId} has ${action} an ISSUE <${issue_url}|${issue_title}>*`;
+        message = `[B]${issueBitrix24UserId} has ${action} an ISSUE [URL=${issue_url}]${issue_title}[/URL][/B]`;
     }
     core.warning(message);
     const { bitrix24WebhookUrl, chatId, botName } = allInputs;
@@ -1845,13 +1849,16 @@ exports.execIssueCommentMention = async (payload, allInputs, githubClient, bitri
         });
     }
     // show comment text as quote text.
-    const comment_lines = comment_body.split("\n");
-    var comment_as_quote = "";
-    comment_lines.forEach(line => {
-        core.warning(line);
+    /*
+      const comment_lines = comment_body.split("\n")
+      var comment_as_quote = "";
+      comment_lines.forEach(line => {
+        core.warning(line)
         comment_as_quote += (">" + line);
-    });
-    const message = `*${commentBitrix24UserId} has ${action} a COMMENT on a ${issue_state} ISSUE ${issueBitrix24UserId} ${issue_title}*:\n${comment_as_quote}\n${comment_url}`;
+      })
+    */
+    const comment_as_quote = "[QUOTE]" + comment_body + "[/QUOTE]";
+    const message = `[B]${commentBitrix24UserId} has ${action} a COMMENT on a ${issue_state} ISSUE ${issueBitrix24UserId} ${issue_title}[/B]\n${comment_as_quote}\n${comment_url}`;
     core.warning(message);
     const { bitrix24WebhookUrl, chatId, botName } = allInputs;
     await bitrix24Client.postToBitrix24(bitrix24WebhookUrl, message, { chatId, botName });
