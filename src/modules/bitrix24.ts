@@ -58,20 +58,19 @@ export const buildBitrix24ErrorMessage = (
 };
 
 export type Bitrix24Option = {
-  iconUrl?: string;
+  chatId?: string;
   botName?: string;
 };
-
+/*
 type Bitrix24PostParam = {
   text: string;
   link_names: 0 | 1;
   username: string;
-  icon_url?: string;
-  icon_emoji?: string;
+  chat_id?: string;
 };
-
+*/
 const defaultBotName = "Github Mention To Bitrix24";
-const defaultIconEmoji = ":bell:";
+//const defaultIconEmoji = ":bell:";
 
 export const Bitrix24RepositoryImpl = {
   postToBitrix24: async (
@@ -87,23 +86,18 @@ export const Bitrix24RepositoryImpl = {
       return defaultBotName;
     })();
 
-    const bitrix24PostParam: Bitrix24PostParam = {
-      text: message,
-      link_names: 0,
-      username: botName,
-    };
-
-    const u = options?.iconUrl;
-    if (u && u !== "") {
-      bitrix24PostParam.icon_url = u;
-    } else {
-      bitrix24PostParam.icon_emoji = defaultIconEmoji;
-    }
+//    const bitrix24PostParam: Bitrix24PostParam = {
+//      text: message,
+//      link_names: 0,
+//      username: botName,
+//    };
 
     const page = "im.message.add.json"
 //    const params = "CHAT_ID=7047&SYSTEM=N&URL_PREVIEW=N"
-    const params = "CHAT_ID=7047&URL_PREVIEW=N"
-    const url = webhookUrl + page + "?" + params + "&MESSAGE=" + encodeURI(message);
+    var params = "CHAT_ID=" + options?.chatId;
+    params += "&URL_PREVIEW=N"
+//    params += "&SYSTEM=N"
+    const url = webhookUrl + page + "?" + params + "&MESSAGE=" + encodeURI("[B]" + botName + "[/B]\n" + message);
     await axios.get(url);
 //    await axios.post(webhookUrl, JSON.stringify(bitrix24PostParam), {
 //      headers: { "Content-Type": "application/json" },
