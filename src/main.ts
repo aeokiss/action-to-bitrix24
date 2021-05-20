@@ -52,6 +52,22 @@ export const convertToBitrix24Username = async (
 const quote_open = "------------------------------------------------------\n";
 const quote_close = "\n------------------------------------------------------";
 
+export const fixBBCodeText = async (
+  input: string
+): Promise<string> => {
+  const mask = [
+    // 아래 코드가 들어갈 경우 문장이 깨지는 경우가 있어서 특수문자로 변환
+    ["[", "［"], // [
+    ["]", "］"], // ]
+    ["#", "＃"] // #
+  ];
+  var output = input;
+  mask.forEach(value => {
+    output = output.split(value[0]).join(value[1]);
+  });
+  return output;
+};
+
 export const markdownToBitrix24Body = async (
   markdown: string,
   githubClient: typeof GithubRepositoryImpl,
@@ -83,7 +99,7 @@ export const markdownToBitrix24Body = async (
 
   mask.forEach(value => {
     bitrix24body = bitrix24body.split(value[0]).join(value[1]);
-  })
+  });
 
   // to bitrix24ID on body
   const githubIds = pickupUsername(bitrix24body);
@@ -136,7 +152,7 @@ export const execPullRequestMention = async (
   }
 
   const action = payload.action;
-  const title = payload.pull_request?.title;
+  const title = fixBBCodeText(payload.pull_request?.title);
   const url = payload.pull_request?.html_url;
   const pull_request_body = payload.pull_request?.body as string;
   const changed_files = payload.pull_request?.changed_files as number;
@@ -204,8 +220,8 @@ export const execPullRequestMention = async (
   }
   else if (action == "closed") {
     if (merged == true) { // the pull request was merged.
-      const pr_from = payload.pull_request?.head?.ref as string;
-      const pr_into = payload.pull_request?.base?.ref as string;
+      const pr_from = fixBBCodeText(payload.pull_request?.head?.ref as string);
+      const pr_into = fixBBCodeText(payload.pull_request?.base?.ref as string);
       var pr_info = quote_open;
       pr_info += ((changed_files > 1) ? "Changed files" : "Changed file") + " : " + changed_files.toString();
       pr_info += ", ";
@@ -259,7 +275,7 @@ export const execPrReviewRequestedCommentMention = async (
   }
 
   const action = payload.action as string;
-  const pr_title = payload.issue?.title as string;
+  const pr_title = fixBBCodeText(payload.issue?.title as string);
   const pr_state = payload.issue?.state as string;
 //  const comment_body = payload.comment?.body as string;
   var comment_body = payload.comment?.body as string;
@@ -332,7 +348,7 @@ export const execPrReviewRequestedMention = async (
     return;
   }
 
-  const title = payload.pull_request?.title;
+  const title = fixBBCodeText(payload.pull_request?.title);
   const url = payload.pull_request?.html_url;
   const requestedBitrix24UserId = (bitrix24Ids[0][0] < 0) ? "@" + requestedGithubUsername : "[USER=" + bitrix24Ids[0][0] + "]" + bitrix24Ids[0][1] + "[/USER]";
   const requestBitrix24UserId = (bitrix24Ids[1][0] < 0) ? "@" + requestUsername : "[USER=" + bitrix24Ids[1][0] + "]" + bitrix24Ids[1][1] + "[/USER]";
@@ -381,7 +397,7 @@ export const execPullRequestReviewMention = async (
   }
 
   const action = payload.action as string;
-  const title = payload.pull_request?.title as string;
+  const title = fixBBCodeText(payload.pull_request?.title as string);
   const url = payload.pull_request?.html_url as string;
   const state = payload.pull_request?.state as string;
   const body = payload.review?.body as string;
@@ -448,7 +464,7 @@ export const execPullRequestReviewComment = async (
   }
 
   const action = payload.action as string;
-  const title = payload.pull_request?.title as string;
+  const title = fixBBCodeText(payload.pull_request?.title as string);
   const url = payload.pull_request?.html_url as string;
   const state = payload.pull_request?.state as string;
   const body = payload.comment?.body as string;
@@ -495,7 +511,7 @@ export const execIssueMention = async (
   }
 
   const action = payload.action as string;
-  const issue_title = payload.issue?.title as string;
+  const issue_title = fixBBCodeText(payload.issue?.title as string);
   // const issue_state = payload.issue?.state as string;
   const issue_body = payload.issue?.body as string;
   const issue_url = payload.issue?.html_url as string;
@@ -591,7 +607,7 @@ export const execIssueCommentMention = async (
   }
 
   const action = payload.action as string;
-  const issue_title = payload.issue?.title as string;
+  const issue_title = fixBBCodeText(payload.issue?.title as string);
   const issue_state = payload.issue?.state as string;
 //  const comment_body = payload.comment?.body as string;
   var comment_body = payload.comment?.body as string;
