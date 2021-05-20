@@ -74,7 +74,9 @@ export const markdownToBitrix24Body = async (
     ["- [ ] ", "- □ "], // check box
 //    ["_", ""], // italic
     ["*", ""], // italic
-    ["> ", "| "] // blockquote
+    ["[", "&#91;"], // [
+    ["]", "&#93;"], // ]
+    ["> ", "| "], // blockquote
   ];
 
   mask.forEach(value => {
@@ -157,7 +159,7 @@ export const execPullRequestMention = async (
       configurationPath,
       context
     );
-    message = `${prBitrix24UserId} has ${action} [B]PULL REQUEST[/B] [URL=${url}]${title}[/URL] ＃${pull_request_number}\n${pr_info}\n${bitrix24Body}`;
+    message = `${prBitrix24UserId} has ${action} [B]PULL REQUEST[/B] [URL=${url}]${title}[/URL] ＃${pull_request_number}\n${pr_info}\n${bitrix24Body}\n${url}`;
   }
   else if (action == "assigned" || action == "unassigned") {
     const targetGithubId = payload.assignee?.login as string;
@@ -169,7 +171,7 @@ export const execPullRequestMention = async (
       context
     );
     const bitrix24Body = quote_open + ((action == "assigned") ? "Added" : "Removed") + " : " + ((bitrix24Ids[0][0] < 0) ? "@" + targetGithubId : "[USER=" + bitrix24Ids[0][0] + "]" + bitrix24Ids[0][1] + "[/USER]") + quote_close;
-    message = `${prBitrix24UserId} has ${action} [B]PULL REQUEST[/B] [URL=${url}]${title}[/URL] ＃${pull_request_number}\n${bitrix24Body}`;
+    message = `${prBitrix24UserId} has ${action} [B]PULL REQUEST[/B] [URL=${url}]${title}[/URL] ＃${pull_request_number}\n${bitrix24Body}\n${url}`;
   }
   else if (action == "closed") {
     if (merged == true) { // the pull request was merged.
@@ -180,14 +182,14 @@ export const execPullRequestMention = async (
       pr_info += ", ";
       pr_info += ((commits > 1) ? "Commits" : "Commit") + " : " + commits.toString();
       pr_info += quote_close;
-      message = `${prBitrix24UserId} has merged [B]PULL REQUEST[/B] into [U]${pr_into}[/U] from [U]${pr_from}[/U] [URL=${url}]${title}[/URL] ＃${pull_request_number}[B]\n${pr_info}`;
+      message = `${prBitrix24UserId} has merged [B]PULL REQUEST[/B] into [U]${pr_into}[/U] from [U]${pr_from}[/U] [URL=${url}]${title}[/URL] ＃${pull_request_number}\n${pr_info}\n${url}`;
     }
     else { // the pull request was closed with unmerged commits.
-      message = `${prBitrix24UserId} has ${action} [B]PULL REQUEST[/B] with unmerged commits [URL=${url}]${title}[/URL] ＃${pull_request_number}`;
+      message = `${prBitrix24UserId} has ${action} [B]PULL REQUEST[/B] with unmerged commits [URL=${url}]${title}[/URL] ＃${pull_request_number}\n${url}`;
     }
   }
   else {
-    message = `${prBitrix24UserId} has ${action} [B]PULL REQUEST[B] [URL=${url}]${title}[/URL] ＃${pull_request_number}`;
+    message = `${prBitrix24UserId} has ${action} [B]PULL REQUEST[B] [URL=${url}]${title}[/URL] ＃${pull_request_number}\n${url}`;
   }
 
   console.log(message);
@@ -307,7 +309,7 @@ export const execPrReviewRequestedMention = async (
   const requestedBitrix24UserId = (bitrix24Ids[0][0] < 0) ? "@" + requestedGithubUsername : "[USER=" + bitrix24Ids[0][0] + "]" + bitrix24Ids[0][1] + "[/USER]";
   const requestBitrix24UserId = (bitrix24Ids[1][0] < 0) ? "@" + requestUsername : "[USER=" + bitrix24Ids[1][0] + "]" + bitrix24Ids[1][1] + "[/USER]";
 
-  const message = `${requestedBitrix24UserId} has been [B]REQUESTED to REVIEW[/B] [URL=${url}]${title}[/URL] by ${requestBitrix24UserId}`;
+  const message = `${requestedBitrix24UserId} has been [B]REQUESTED to REVIEW[/B] [URL=${url}]${title}[/URL] by ${requestBitrix24UserId}\n${url}`;
   const { bitrix24WebhookUrl, chatId, botName } = allInputs;
 
   await bitrix24Client.postToBitrix24(bitrix24WebhookUrl, message, { chatId, botName });
@@ -465,7 +467,7 @@ export const execIssueMention = async (
       configurationPath,
       context
     );
-    message = `${issueBitrix24UserId} has ${action} an [B]ISSUE[/B] [URL=${issue_url}]${issue_title}[/URL]\n${bitrix24Body}`;
+    message = `${issueBitrix24UserId} has ${action} an [B]ISSUE[/B] [URL=${issue_url}]${issue_title}[/URL]\n${bitrix24Body}\n${issue_url}`;
   }
   else if (action == "assigned" || action == "unassigned") {
     const targetGithubId = payload.assignee?.login as string;
@@ -477,10 +479,10 @@ export const execIssueMention = async (
       context
     );
     const bitrix24Body = quote_open + ((action == "assigned") ? "Added" : "Removed") + " : " + ((bitrix24Ids[0][0] < 0) ? "@" + targetGithubId : "[USER=" + bitrix24Ids[0][0] + "]" + bitrix24Ids[0][1] + "[/USER]") + quote_close;
-    message = `${issueBitrix24UserId} has ${action} an [B]ISSUE[/B] [URL=${issue_url}]${issue_title}[/URL]\n${bitrix24Body}`;
+    message = `${issueBitrix24UserId} has ${action} an [B]ISSUE[/B] [URL=${issue_url}]${issue_title}[/URL]\n${bitrix24Body}\n${issue_url}`;
   }
   else {
-    message = `${issueBitrix24UserId} has ${action} an [B]ISSUE[/B] [URL=${issue_url}]${issue_title}[/URL]`;
+    message = `${issueBitrix24UserId} has ${action} an [B]ISSUE[/B] [URL=${issue_url}]${issue_title}[/URL]\n${issue_url}`;
   }
 
   core.warning(message)

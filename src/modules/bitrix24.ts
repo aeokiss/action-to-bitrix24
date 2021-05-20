@@ -97,7 +97,7 @@ export const Bitrix24RepositoryImpl = {
     var params = "CHAT_ID=" + options?.chatId;
     params += "&URL_PREVIEW=N"
 //    params += "&SYSTEM=N"
-    const url = webhookUrl + page + "?" + params + "&MESSAGE=" + encodeURI("[B][" + botName + "][/B]\n" + message);
+    const url = webhookUrl + page + "?" + params + "&MESSAGE=" + encodeURI("[B]" + botName + "[/B]\n" + message);
     await axios.get(url);
 //    await axios.post(webhookUrl, JSON.stringify(bitrix24PostParam), {
 //      headers: { "Content-Type": "application/json" },
