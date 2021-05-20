@@ -1564,9 +1564,11 @@ exports.markdownToBitrix24Body = async (markdown, githubClient, repoToken, confi
         ["- [ ] ", "- □ "],
         //    ["_", ""], // italic
         ["*", ""],
-        ["[", "&#91;"],
-        ["]", "&#93;"],
         ["> ", "| "],
+        // 아래 코드가 들어갈 경우 문장이 깨지는 경우가 있어서 특수문자로 변환
+        ["[", "［"],
+        ["]", "］"],
+        ["#", "＃"] // #
     ];
     mask.forEach(value => {
         bitrix24body = bitrix24body.split(value[0]).join(value[1]);
