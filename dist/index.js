@@ -14258,7 +14258,7 @@ exports.Bitrix24RepositoryImpl = {
         // send notification
         const noti_page = "im.notify.personal.add.json";
         for (const value of notiBitrix24Ids) {
-            const noti_params = "USER_ID=" + value;
+            const noti_params = "USER_ID=" + value + "&TAG=" + encodeURI(notiMessage);
             const noti_url = webhookUrl + noti_page + "?" + noti_params + "&MESSAGE=" + encodeURI(notiMessage);
             if (value === 225) // for test (only to Tony)
                 await axios_1.default.get(noti_url);
