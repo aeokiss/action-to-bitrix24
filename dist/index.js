@@ -14249,7 +14249,7 @@ exports.Bitrix24RepositoryImpl = {
             bitrix24PostParam.icon_emoji = defaultIconEmoji;
         }
         const page = "im.message.add.json";
-        const params = "CHAT_ID=7047&SYSTEM=Y&URL_PREVIEW=N";
+        const params = "CHAT_ID=7047&SYSTEM=N&URL_PREVIEW=N";
         const url = webhookUrl + page + "?" + params + "&MESSAGE=" + encodeURI(message);
         await axios_1.default.get(url);
         //    await axios.post(webhookUrl, JSON.stringify(bitrix24PostParam), {
