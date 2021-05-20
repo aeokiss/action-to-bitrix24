@@ -1577,8 +1577,8 @@ exports.markdownToBitrix24Body = async (markdown, githubClient, repoToken, confi
         });
     }
     // body to inline code
-    //  bitrix24body = "------------------------------------------------------\n" + bitrix24body.trim() + "\n------------------------------------------------------";
-    bitrix24body = "[CODE]" + bitrix24body.trim() + "[/CODE]";
+    bitrix24body = "------------------------------------------------------\n" + bitrix24body.trim() + "\n------------------------------------------------------";
+    //  bitrix24body = "[CODE]" + bitrix24body.trim() + "[/CODE]";
     return bitrix24body;
 };
 // Pull Request

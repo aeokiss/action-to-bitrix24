@@ -94,8 +94,8 @@ export const markdownToBitrix24Body = async (
     })
   }
   // body to inline code
-//  bitrix24body = "------------------------------------------------------\n" + bitrix24body.trim() + "\n------------------------------------------------------";
-  bitrix24body = "[CODE]" + bitrix24body.trim() + "[/CODE]";
+  bitrix24body = "------------------------------------------------------\n" + bitrix24body.trim() + "\n------------------------------------------------------";
+//  bitrix24body = "[CODE]" + bitrix24body.trim() + "[/CODE]";
 
   return bitrix24body;
 };
