@@ -112,7 +112,7 @@ export const pickupInfoFromGithubPayload = (
 };
 
 type MappingFile = {
-  [githugUsername: string]: string | undefined;
+  [githugUsername: string]: [number, string] | undefined;
 };
 
 export const GithubRepositoryImpl = {

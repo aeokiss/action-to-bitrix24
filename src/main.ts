@@ -5,11 +5,11 @@ import { WebhookPayload } from "@actions/github/lib/interfaces";
 
 import {
   pickupUsername,
-  pickupInfoFromGithubPayload,
+//  pickupInfoFromGithubPayload,
   GithubRepositoryImpl,
 } from "./modules/github";
 import {
-  buildBitrix24PostMessage,
+//  buildBitrix24PostMessage,
   buildBitrix24ErrorMessage,
   Bitrix24RepositoryImpl,
 } from "./modules/bitrix24";
@@ -30,7 +30,7 @@ export const convertToBitrix24Username = async (
   repoToken: string,
   configurationPath: string,
   context: Pick<Context, "repo" | "sha">
-): Promise<string[]> => {
+): Promise<[number, string][]> => {
   const mapping = await githubClient.loadNameMappingConfig(
     repoToken,
     context.repo.owner,
@@ -42,9 +42,9 @@ export const convertToBitrix24Username = async (
   const bitrix24Ids = githubUsernames.map(
     (githubUsername) => {
     var bitrix24Id = mapping[githubUsername];
-    return (bitrix24Id !== undefined)? bitrix24Id : githubUsername;
+    return (bitrix24Id !== undefined)? bitrix24Id : [-1, githubUsername];
     }
-  ) as string[];
+  ) as [number, string][];
 
   return bitrix24Ids;
 };
@@ -89,12 +89,13 @@ export const markdownToBitrix24Body = async (
       context
     );
     githubIds.forEach((value, index) => {
-      if (value != bitrix24Ids[index])
-      bitrix24body = bitrix24body.split("@" + value).join("<@" + bitrix24Ids[index] + ">");
+      if (bitrix24Ids[index][0] >= 0)
+        bitrix24body = bitrix24body.split("@" + value).join("[USER=" + bitrix24Ids[index][0] + "]" + bitrix24Ids[index][1] + "[/USER]");
     })
   }
   // body to inline code
-  bitrix24body = "------------------------------------------------------\n" + bitrix24body + "\n------------------------------------------------------";
+//  bitrix24body = "------------------------------------------------------\n" + bitrix24body.trim() + "\n------------------------------------------------------";
+  bitrix24body = "[CODE]" + bitrix24body.trim() + "[/CODE]";
 
   return bitrix24body;
 };
@@ -135,7 +136,7 @@ export const execPullRequestMention = async (
   const merged = payload.pull_request?.merged as boolean;
   const pull_request_number = payload.pull_request?.number as number;
   // fixed for mobile app
-  const prBitrix24UserId = (bitrix24Ids[0] == pullRequestGithubUsername) ? "@" + pullRequestGithubUsername : "<@" + bitrix24Ids[0] + ">";
+  const prBitrix24UserId = (bitrix24Ids[0][0] < 0) ? "@" + pullRequestGithubUsername : "[USER=" + bitrix24Ids[0][0] + "]" + bitrix24Ids[0][1] + "[/USER]";
 
   var message = "";
   if (action === "opened" || action === "edited") {
@@ -162,7 +163,7 @@ export const execPullRequestMention = async (
       configurationPath,
       context
     );
-    const bitrix24Body = ">" + ((action == "assigned") ? "Added" : "Removed") + " : " + ((targetGithubId == bitrix24Ids[0]) ? "@" + targetGithubId : "<@" + bitrix24Ids[0] + ">");
+    const bitrix24Body = ">" + ((action == "assigned") ? "Added" : "Removed") + " : " + ((bitrix24Ids[0][0] < 0) ? "@" + targetGithubId : "[USER=" + bitrix24Ids[0][0] + "]" + bitrix24Ids[0][1] + "[/USER]");
     message = `*${prBitrix24UserId} has ${action} PULL REQUEST <${url}|${title}> #${pull_request_number}*\n${bitrix24Body}`;
   }
   else if (action == "closed") {
@@ -226,8 +227,8 @@ export const execPrReviewRequestedCommentMention = async (
 //  const comment_body = payload.comment?.body as string;
   var comment_body = payload.comment?.body as string;
   const comment_url = payload.comment?.html_url as string;
-  const commentBitrix24UserId = (bitrix24Ids[0] == commentGithubUsername) ? "@" + commentGithubUsername : "<@" + bitrix24Ids[0] + ">";
-  const pullRequestedBitrix24UserId = (bitrix24Ids[1] == pullRequestedGithubUsername) ? "@" + pullRequestedGithubUsername : "<@" + bitrix24Ids[1] + ">";
+  const commentBitrix24UserId = (bitrix24Ids[0][0] < 0) ? "@" + commentGithubUsername : "[USER=" + bitrix24Ids[0][0] + "]" + bitrix24Ids[0][1] + "[/USER]";
+  const pullRequestedBitrix24UserId = (bitrix24Ids[1][0] < 0) ? "@" + pullRequestedGithubUsername : "[USER=" + bitrix24Ids[1][0] + "]" + bitrix24Ids[1][1] + "[/USER]";
 
   // to bitrix24ID on comment
   const githubIds = pickupUsername(comment_body);
@@ -240,8 +241,8 @@ export const execPrReviewRequestedCommentMention = async (
       context
     );
     githubIds.forEach((value, index) => {
-      if (value != bitrix24Ids[index])
-        comment_body = comment_body.split("@" + value).join("<@" + bitrix24Ids[index] + ">");
+      if (bitrix24Ids[index][0] >= 0)
+        comment_body = comment_body.split("@" + value).join("[USER=" + bitrix24Ids[index][0] + "]" + bitrix24Ids[index][1] + "[/USER]");
     })
   }
 
@@ -294,8 +295,8 @@ export const execPrReviewRequestedMention = async (
 
   const title = payload.pull_request?.title;
   const url = payload.pull_request?.html_url;
-  const requestedBitrix24UserId = (bitrix24Ids[0] == requestedGithubUsername) ? "@" + requestedGithubUsername : "<@" + bitrix24Ids[0] + ">";
-  const requestBitrix24UserId = (bitrix24Ids[1] == requestUsername) ? "@" + requestUsername : "<@" + bitrix24Ids[1] + ">";
+  const requestedBitrix24UserId = (bitrix24Ids[0][0] < 0) ? "@" + requestedGithubUsername : "[USER=" + bitrix24Ids[0][0] + "]" + bitrix24Ids[0][1] + "[/USER]";
+  const requestBitrix24UserId = (bitrix24Ids[1][0] < 0) ? "@" + requestUsername : "[USER=" + bitrix24Ids[1][0] + "]" + bitrix24Ids[1][1] + "[/USER]";
 
   const message = `*${requestedBitrix24UserId} has been REQUESTED to REVIEW <${url}|${title}> by ${requestBitrix24UserId}*`;
   const { bitrix24WebhookUrl, iconUrl, botName } = allInputs;
@@ -340,8 +341,8 @@ export const execPullRequestReviewMention = async (
   const state = payload.pull_request?.state as string;
   const body = payload.review?.body as string;
   const review_url = payload.review?.html_url as string;
-  const reviewerBitrix24UserId = (bitrix24Ids[0] == reviewerUsername) ? "@" + reviewerUsername : "<@" + bitrix24Ids[0] + ">";
-  const pullRequestBitrix24UserId = (bitrix24Ids[1] == pullRequestUsername) ? "@" + pullRequestUsername : "<@" + bitrix24Ids[1] + ">";
+  const reviewerBitrix24UserId = (bitrix24Ids[0][0] < 0) ? "@" + reviewerUsername : "[USER=" + bitrix24Ids[0][0] + "]" + bitrix24Ids[0][1] + "[/USER]";
+  const pullRequestBitrix24UserId = (bitrix24Ids[1][0] < 0) ? "@" + pullRequestUsername : "[USER=" + bitrix24Ids[1][0] + "]" + bitrix24Ids[1][1] + "[/USER]";
   const cm_state = payload.review?.state as string;
 
   const bitrix24Body = await markdownToBitrix24Body(
@@ -401,8 +402,8 @@ export const execPullRequestReviewComment = async (
   const changeFilePath = payload.comment?.path as string;
   const diffHunk = payload.comment?.diff_hunk as string;
   const comment_url = payload.comment?.html_url as string;
-  const reviewCommentBitrix24UserId = (bitrix24Ids[0] == reviewerCommentUsername) ? "@" + reviewerCommentUsername : "<@" + bitrix24Ids[0] + ">";;
-  const pullRequestBitrix24UserId = (bitrix24Ids[1] == pullRequestUsername) ? "@" + pullRequestUsername : "<@" + bitrix24Ids[1] + ">";;
+  const reviewCommentBitrix24UserId = (bitrix24Ids[0][0] < 0) ? "@" + reviewerCommentUsername : "[USER=" + bitrix24Ids[0][0] + "]" + bitrix24Ids[0][1] + "[/USER]";
+  const pullRequestBitrix24UserId = (bitrix24Ids[1][0] < 0) ? "@" + pullRequestUsername : "[USER=" + bitrix24Ids[1][0] + "]" + bitrix24Ids[1][1] + "[/USER]";
 
   const message = `*${reviewCommentBitrix24UserId} has ${action} a COMMENT REVIEW on ${state} PULL REQUEST <${url}|${title}>, which created by ${pullRequestBitrix24UserId}*\n \n\`\`\`${changeFilePath}\n${diffHunk}\`\`\`\n${body}\n${comment_url}`;
   const { bitrix24WebhookUrl, iconUrl, botName } = allInputs;
@@ -443,7 +444,7 @@ export const execIssueMention = async (
   // const issue_state = payload.issue?.state as string;
   const issue_body = payload.issue?.body as string;
   const issue_url = payload.issue?.html_url as string;
-  const issueBitrix24UserId = (bitrix24Ids[0] == issueGithubUsername) ? "@" + issueGithubUsername : "<@" + bitrix24Ids[0] + ">";
+  const issueBitrix24UserId = (bitrix24Ids[0][0] < 0) ? "@" + issueGithubUsername : "[USER=" + bitrix24Ids[0][0] + "]" + bitrix24Ids[0][1] + "[/USER]";
 
   var message = "";
 
@@ -455,7 +456,7 @@ export const execIssueMention = async (
       configurationPath,
       context
     );
-    message = `[B]]${issueBitrix24UserId} has ${action} an ISSUE [URL=${issue_url}]${issue_title}[/URL][/B]\n${bitrix24Body}`;
+    message = `[B]${issueBitrix24UserId} has ${action} an ISSUE [URL=${issue_url}]${issue_title}[/URL][/B]\n${bitrix24Body}`;
   }
   else if (action == "assigned" || action == "unassigned") {
     const targetGithubId = payload.assignee?.login as string;
@@ -466,7 +467,7 @@ export const execIssueMention = async (
       configurationPath,
       context
     );
-    const bitrix24Body = ">" + ((action == "assigned") ? "Added" : "Removed") + " : " + ((targetGithubId == bitrix24Ids[0]) ? "@" + targetGithubId : "<@" + bitrix24Ids[0] + ">");
+    const bitrix24Body = ">" + ((action == "assigned") ? "Added" : "Removed") + " : " + ((bitrix24Ids[0][0] < 0) ? "@" + targetGithubId : "[USER=" + bitrix24Ids[0][0] + "]" + bitrix24Ids[0][1] + "[/USER]");
     message = `*${issueBitrix24UserId} has ${action} an ISSUE <${issue_url}|${issue_title}>*:\n${bitrix24Body}`;
   }
   else {
@@ -516,8 +517,8 @@ export const execIssueCommentMention = async (
 //  const comment_body = payload.comment?.body as string;
   var comment_body = payload.comment?.body as string;
   const comment_url = payload.comment?.html_url as string;
-  const commentBitrix24UserId = (bitrix24Ids[0] == commentGithubUsername) ? "@" + commentGithubUsername : "<@" + bitrix24Ids[0] + ">";
-  const issueBitrix24UserId = (bitrix24Ids[1] == issueGithubUsername) ? "@" + issueGithubUsername : "<@" + bitrix24Ids[1] + ">";
+  const commentBitrix24UserId = (bitrix24Ids[0][0] < 0) ? "@" + commentGithubUsername : "[USER=" + bitrix24Ids[0][0] + "]" + bitrix24Ids[0][1] + "[/USER]";
+  const issueBitrix24UserId = (bitrix24Ids[1][0] < 0) ? "@" + issueGithubUsername : "[USER=" + bitrix24Ids[1][0] + "]" + bitrix24Ids[1][1] + "[/USER]";
 
   // to bitrix24ID on comment
   const githubIds = pickupUsername(comment_body);
@@ -530,8 +531,8 @@ export const execIssueCommentMention = async (
       context
     );
     githubIds.forEach((value, index) => {
-      if (value != bitrix24Ids[index])
-        comment_body = comment_body.split("@" + value).join("<@" + bitrix24Ids[index] + ">");
+      if (bitrix24Ids[index][0] >= 0)
+        comment_body = comment_body.split("@" + value).join("[USER=" + bitrix24Ids[index][0] + "]" + bitrix24Ids[index][1] + "[/USER]");
     })
   }
 
@@ -549,7 +550,7 @@ export const execIssueCommentMention = async (
 
   await bitrix24Client.postToBitrix24(bitrix24WebhookUrl, message, { iconUrl, botName });
 };
-
+/*
 export const execNormalMention = async (
   payload: WebhookPayload,
   allInputs: AllInputs,
@@ -593,7 +594,7 @@ export const execNormalMention = async (
 
   await bitrix24Client.postToBitrix24(bitrix24WebhookUrl, message, { iconUrl, botName });
 };
-
+*/
 const buildCurrentJobUrl = (runId: string) => {
   const { owner, repo } = context.repo;
   return `https://github.com/${owner}/${repo}/actions/runs/${runId}`;
