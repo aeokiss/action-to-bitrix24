@@ -1705,7 +1705,7 @@ exports.execPrReviewRequestedCommentMention = async (payload, allInputs, githubC
     const pr_title = fixBBCodeText((_e = payload.issue) === null || _e === void 0 ? void 0 : _e.title);
     const pr_state = (_f = payload.issue) === null || _f === void 0 ? void 0 : _f.state;
     //  const comment_body = payload.comment?.body as string;
-    var comment_body = (_g = payload.comment) === null || _g === void 0 ? void 0 : _g.body;
+    var comment_body = fixBBCodeText((_g = payload.comment) === null || _g === void 0 ? void 0 : _g.body);
     const comment_url = (_h = payload.comment) === null || _h === void 0 ? void 0 : _h.html_url;
     const commentBitrix24UserId = (bitrix24Ids[0][0] < 0) ? "@" + commentGithubUsername : "[USER=" + bitrix24Ids[0][0] + "]" + bitrix24Ids[0][1] + "[/USER]";
     const pullRequestedBitrix24UserId = (bitrix24Ids[1][0] < 0) ? "@" + pullRequestedGithubUsername : "[USER=" + bitrix24Ids[1][0] + "]" + bitrix24Ids[1][1] + "[/USER]";
@@ -1906,7 +1906,7 @@ exports.execIssueCommentMention = async (payload, allInputs, githubClient, bitri
     const issue_title = fixBBCodeText((_e = payload.issue) === null || _e === void 0 ? void 0 : _e.title);
     const issue_state = (_f = payload.issue) === null || _f === void 0 ? void 0 : _f.state;
     //  const comment_body = payload.comment?.body as string;
-    var comment_body = (_g = payload.comment) === null || _g === void 0 ? void 0 : _g.body;
+    var comment_body = fixBBCodeText((_g = payload.comment) === null || _g === void 0 ? void 0 : _g.body);
     const comment_url = (_h = payload.comment) === null || _h === void 0 ? void 0 : _h.html_url;
     const commentBitrix24UserId = (bitrix24Ids[0][0] < 0) ? "@" + commentGithubUsername : "[USER=" + bitrix24Ids[0][0] + "]" + bitrix24Ids[0][1] + "[/USER]";
     const issueBitrix24UserId = (bitrix24Ids[1][0] < 0) ? "@" + issueGithubUsername : "[USER=" + bitrix24Ids[1][0] + "]" + bitrix24Ids[1][1] + "[/USER]";

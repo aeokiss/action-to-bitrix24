@@ -281,7 +281,7 @@ export const execPrReviewRequestedCommentMention = async (
   const pr_title = fixBBCodeText(payload.issue?.title as string);
   const pr_state = payload.issue?.state as string;
 //  const comment_body = payload.comment?.body as string;
-  var comment_body = payload.comment?.body as string;
+  var comment_body = fixBBCodeText(payload.comment?.body as string);
   const comment_url = payload.comment?.html_url as string;
   const commentBitrix24UserId = (bitrix24Ids[0][0] < 0) ? "@" + commentGithubUsername : "[USER=" + bitrix24Ids[0][0] + "]" + bitrix24Ids[0][1] + "[/USER]";
   const pullRequestedBitrix24UserId = (bitrix24Ids[1][0] < 0) ? "@" + pullRequestedGithubUsername : "[USER=" + bitrix24Ids[1][0] + "]" + bitrix24Ids[1][1] + "[/USER]";
@@ -613,7 +613,7 @@ export const execIssueCommentMention = async (
   const issue_title = fixBBCodeText(payload.issue?.title as string);
   const issue_state = payload.issue?.state as string;
 //  const comment_body = payload.comment?.body as string;
-  var comment_body = payload.comment?.body as string;
+  var comment_body = fixBBCodeText(payload.comment?.body as string);
   const comment_url = payload.comment?.html_url as string;
   const commentBitrix24UserId = (bitrix24Ids[0][0] < 0) ? "@" + commentGithubUsername : "[USER=" + bitrix24Ids[0][0] + "]" + bitrix24Ids[0][1] + "[/USER]";
   const issueBitrix24UserId = (bitrix24Ids[1][0] < 0) ? "@" + issueGithubUsername : "[USER=" + bitrix24Ids[1][0] + "]" + bitrix24Ids[1][1] + "[/USER]";
