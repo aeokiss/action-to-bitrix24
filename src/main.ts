@@ -87,6 +87,7 @@ export const markdownToBitrix24Body = async (
     ["**", ""], // bold
     ["* ", "● "], // unordered list
     ["- [ ] ", "- □ "], // check box
+    ["- [x] ", "- ☑ "], // check box (checked)
 //    ["_", ""], // italic
     ["*", ""], // italic
     ["> ", "| "], // blockquote
