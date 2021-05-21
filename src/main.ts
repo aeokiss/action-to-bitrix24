@@ -165,6 +165,8 @@ export const execPullRequestMention = async (
   var notiMessage = "";
 
   if (action === "opened" || action === "edited") {
+    const pr_from = fixBBCodeText(payload.pull_request?.head?.ref as string);
+    const pr_into = fixBBCodeText(payload.pull_request?.base?.ref as string);
     const body = (pull_request_body.length > 0) ? pull_request_body : "No description provided.";
     var pr_info = quote_open;
     pr_info += ((changed_files > 1) ? "Changed files" : "Changed file") + " : " + changed_files.toString();
@@ -194,7 +196,7 @@ export const execPullRequestMention = async (
       configurationPath,
       context
     );
-    message = `${prBitrix24UserId} has ${action} [B]PULL REQUEST[/B] [URL=${url}]${title}[/URL] ＃${pull_request_number}\n${pr_info}\n${bitrix24Body}\n${url}`;
+    message = `${prBitrix24UserId} has ${action} [B]PULL REQUEST[/B] into [I]${pr_into}[/I] from [I]${pr_from}[/I] [URL=${url}]${title}[/URL] ＃${pull_request_number}\n${pr_info}\n${bitrix24Body}\n${url}`;
     notiMessage = `[GITHUB] Mentioned you in PULL REQUEST ${url}`;
   }
   else if (action == "assigned" || action == "unassigned") {
