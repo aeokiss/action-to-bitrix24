@@ -1554,6 +1554,7 @@ function fixBBCodeText(input) {
         // 아래 코드가 들어갈 경우 문장이 깨지는 경우가 있어서 특수문자로 변환
         ["[", "［"],
         ["]", "］"],
+        ["&", "＆"],
         ["#", "＃"] // #
     ];
     var output = input;
@@ -1582,6 +1583,7 @@ exports.markdownToBitrix24Body = async (markdown, githubClient, repoToken, confi
         // 아래 코드가 들어갈 경우 문장이 깨지는 경우가 있어서 특수문자로 변환
         ["[", "［"],
         ["]", "］"],
+        ["&", "＆"],
         ["#", "＃"] // #
     ];
     mask.forEach(value => {
