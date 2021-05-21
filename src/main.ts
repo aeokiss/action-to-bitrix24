@@ -52,9 +52,7 @@ export const convertToBitrix24Username = async (
 const quote_open = "------------------------------------------------------\n";
 const quote_close = "\n------------------------------------------------------";
 
-export const fixBBCodeText = async (
-  input: string
-): Promise<string> => {
+function fixBBCodeText(input: string) {
   const mask = [
     // 아래 코드가 들어갈 경우 문장이 깨지는 경우가 있어서 특수문자로 변환
     ["[", "［"], // [
