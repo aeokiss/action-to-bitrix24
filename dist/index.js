@@ -1603,7 +1603,7 @@ exports.markdownToBitrix24Body = async (markdown, githubClient, repoToken, confi
 };
 // Pull Request
 exports.execPullRequestMention = async (payload, allInputs, githubClient, bitrix24Client, context) => {
-    var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o, _p;
+    var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o, _p, _q, _r, _s, _t;
     const { repoToken, configurationPath } = allInputs;
     const pullRequestGithubUsername = (_b = (_a = payload.pull_request) === null || _a === void 0 ? void 0 : _a.user) === null || _b === void 0 ? void 0 : _b.login;
     console.log(pullRequestGithubUsername);
@@ -1628,6 +1628,8 @@ exports.execPullRequestMention = async (payload, allInputs, githubClient, bitrix
     var notiBitrix24Ids = [];
     var notiMessage = "";
     if (action === "opened" || action === "edited") {
+        const pr_from = fixBBCodeText((_l = (_k = payload.pull_request) === null || _k === void 0 ? void 0 : _k.head) === null || _l === void 0 ? void 0 : _l.ref);
+        const pr_into = fixBBCodeText((_o = (_m = payload.pull_request) === null || _m === void 0 ? void 0 : _m.base) === null || _o === void 0 ? void 0 : _o.ref);
         const body = (pull_request_body.length > 0) ? pull_request_body : "No description provided.";
         var pr_info = quote_open;
         pr_info += ((changed_files > 1) ? "Changed files" : "Changed file") + " : " + changed_files.toString();
@@ -1643,11 +1645,11 @@ exports.execPullRequestMention = async (payload, allInputs, githubClient, bitrix
             });
         }
         const bitrix24Body = await exports.markdownToBitrix24Body(body, githubClient, repoToken, configurationPath, context);
-        message = `${prBitrix24UserId} has ${action} [B]PULL REQUEST[/B] [URL=${url}]${title}[/URL] ＃${pull_request_number}\n${pr_info}\n${bitrix24Body}\n${url}`;
+        message = `${prBitrix24UserId} has ${action} [B]PULL REQUEST[/B] into [I]${pr_into}[/I] from [I]${pr_from}[/I] [URL=${url}]${title}[/URL] ＃${pull_request_number}\n${pr_info}\n${bitrix24Body}\n${url}`;
         notiMessage = `[GITHUB] Mentioned you in PULL REQUEST ${url}`;
     }
     else if (action == "assigned" || action == "unassigned") {
-        const targetGithubId = (_k = payload.assignee) === null || _k === void 0 ? void 0 : _k.login;
+        const targetGithubId = (_p = payload.assignee) === null || _p === void 0 ? void 0 : _p.login;
         const bitrix24Ids = await exports.convertToBitrix24Username([targetGithubId], githubClient, repoToken, configurationPath, context);
         if (bitrix24Ids[0][0] >= 0)
             notiBitrix24Ids.push(bitrix24Ids[0][0]);
@@ -1660,8 +1662,8 @@ exports.execPullRequestMention = async (payload, allInputs, githubClient, bitrix
     }
     else if (action == "closed") {
         if (merged == true) { // the pull request was merged.
-            const pr_from = fixBBCodeText((_m = (_l = payload.pull_request) === null || _l === void 0 ? void 0 : _l.head) === null || _m === void 0 ? void 0 : _m.ref);
-            const pr_into = fixBBCodeText((_p = (_o = payload.pull_request) === null || _o === void 0 ? void 0 : _o.base) === null || _p === void 0 ? void 0 : _p.ref);
+            const pr_from = fixBBCodeText((_r = (_q = payload.pull_request) === null || _q === void 0 ? void 0 : _q.head) === null || _r === void 0 ? void 0 : _r.ref);
+            const pr_into = fixBBCodeText((_t = (_s = payload.pull_request) === null || _s === void 0 ? void 0 : _s.base) === null || _t === void 0 ? void 0 : _t.ref);
             var pr_info = quote_open;
             pr_info += ((changed_files > 1) ? "Changed files" : "Changed file") + " : " + changed_files.toString();
             pr_info += ", ";
@@ -14272,7 +14274,8 @@ exports.Bitrix24RepositoryImpl = {
         // send notification
         const noti_page = "im.notify.personal.add.json";
         for (const value of notiBitrix24Ids) {
-            const noti_params = "USER_ID=" + value + "&TAG=" + encodeURI(notiMessage);
+            //      const noti_params = "USER_ID=" + value + "&TAG=" + encodeURI(notiMessage);
+            const noti_params = "USER_ID=" + value;
             const noti_url = webhookUrl + noti_page + "?" + noti_params + "&MESSAGE=" + encodeURI(notiMessage + "\n[CHAT=" + (options === null || options === void 0 ? void 0 : options.chatId) + "]Go to Chat...[/CHAT]");
             if (value === 225) // for test (only to Tony)
                 await axios_1.default.get(noti_url);

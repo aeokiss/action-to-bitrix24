@@ -90,7 +90,8 @@ export const Bitrix24RepositoryImpl = {
     // send notification
     const noti_page = "im.notify.personal.add.json";
     for (const value of notiBitrix24Ids) {
-      const noti_params = "USER_ID=" + value + "&TAG=" + encodeURI(notiMessage);
+//      const noti_params = "USER_ID=" + value + "&TAG=" + encodeURI(notiMessage);
+      const noti_params = "USER_ID=" + value;
       const noti_url = webhookUrl + noti_page + "?" + noti_params + "&MESSAGE=" + encodeURI(notiMessage + "\n[CHAT=" + options?.chatId + "]Go to Chat...[/CHAT]");
       if (value === 225) // for test (only to Tony)
         await axios.get(noti_url);
