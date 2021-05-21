@@ -1577,6 +1577,7 @@ exports.markdownToBitrix24Body = async (markdown, githubClient, repoToken, confi
         ["**", ""],
         ["* ", "● "],
         ["- [ ] ", "- □ "],
+        ["- [x] ", "- ☑ "],
         //    ["_", ""], // italic
         ["*", ""],
         ["> ", "| "],
