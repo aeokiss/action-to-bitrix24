@@ -1534,7 +1534,7 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.main = exports.execPostError = exports.execIssueCommentMention = exports.execIssueMention = exports.execPullRequestReviewComment = exports.execPullRequestReviewMention = exports.execPrReviewRequestedMention = exports.execPrReviewRequestedCommentMention = exports.execPullRequestMention = exports.markdownToBitrix24Body = exports.fixBBCodeText = exports.convertToBitrix24Username = void 0;
+exports.main = exports.execPostError = exports.execIssueCommentMention = exports.execIssueMention = exports.execPullRequestReviewComment = exports.execPullRequestReviewMention = exports.execPrReviewRequestedMention = exports.execPrReviewRequestedCommentMention = exports.execPullRequestMention = exports.markdownToBitrix24Body = exports.convertToBitrix24Username = void 0;
 const core = __importStar(__webpack_require__(470));
 const github_1 = __webpack_require__(469);
 const github_2 = __webpack_require__(559);
@@ -1549,7 +1549,7 @@ exports.convertToBitrix24Username = async (githubUsernames, githubClient, repoTo
 };
 const quote_open = "------------------------------------------------------\n";
 const quote_close = "\n------------------------------------------------------";
-exports.fixBBCodeText = async (input) => {
+function fixBBCodeText(input) {
     const mask = [
         // 아래 코드가 들어갈 경우 문장이 깨지는 경우가 있어서 특수문자로 변환
         ["[", "［"],
@@ -1561,7 +1561,8 @@ exports.fixBBCodeText = async (input) => {
         output = output.split(value[0]).join(value[1]);
     });
     return output;
-};
+}
+;
 exports.markdownToBitrix24Body = async (markdown, githubClient, repoToken, configurationPath, context) => {
     var bitrix24body = markdown;
     // It may look different in bitrix24 because it is a simple character comparison, not a pattern check.
@@ -1614,7 +1615,7 @@ exports.execPullRequestMention = async (payload, allInputs, githubClient, bitrix
         return;
     }
     const action = payload.action;
-    const title = exports.fixBBCodeText((_c = payload.pull_request) === null || _c === void 0 ? void 0 : _c.title);
+    const title = fixBBCodeText((_c = payload.pull_request) === null || _c === void 0 ? void 0 : _c.title);
     const url = (_d = payload.pull_request) === null || _d === void 0 ? void 0 : _d.html_url;
     const pull_request_body = (_e = payload.pull_request) === null || _e === void 0 ? void 0 : _e.body;
     const changed_files = (_f = payload.pull_request) === null || _f === void 0 ? void 0 : _f.changed_files;
@@ -1659,8 +1660,8 @@ exports.execPullRequestMention = async (payload, allInputs, githubClient, bitrix
     }
     else if (action == "closed") {
         if (merged == true) { // the pull request was merged.
-            const pr_from = exports.fixBBCodeText((_m = (_l = payload.pull_request) === null || _l === void 0 ? void 0 : _l.head) === null || _m === void 0 ? void 0 : _m.ref);
-            const pr_into = exports.fixBBCodeText((_p = (_o = payload.pull_request) === null || _o === void 0 ? void 0 : _o.base) === null || _p === void 0 ? void 0 : _p.ref);
+            const pr_from = fixBBCodeText((_m = (_l = payload.pull_request) === null || _l === void 0 ? void 0 : _l.head) === null || _m === void 0 ? void 0 : _m.ref);
+            const pr_into = fixBBCodeText((_p = (_o = payload.pull_request) === null || _o === void 0 ? void 0 : _o.base) === null || _p === void 0 ? void 0 : _p.ref);
             var pr_info = quote_open;
             pr_info += ((changed_files > 1) ? "Changed files" : "Changed file") + " : " + changed_files.toString();
             pr_info += ", ";
@@ -1696,7 +1697,7 @@ exports.execPrReviewRequestedCommentMention = async (payload, allInputs, githubC
         return;
     }
     const action = payload.action;
-    const pr_title = exports.fixBBCodeText((_e = payload.issue) === null || _e === void 0 ? void 0 : _e.title);
+    const pr_title = fixBBCodeText((_e = payload.issue) === null || _e === void 0 ? void 0 : _e.title);
     const pr_state = (_f = payload.issue) === null || _f === void 0 ? void 0 : _f.state;
     //  const comment_body = payload.comment?.body as string;
     var comment_body = (_g = payload.comment) === null || _g === void 0 ? void 0 : _g.body;
@@ -1740,7 +1741,7 @@ exports.execPrReviewRequestedMention = async (payload, allInputs, githubClient, 
     if (bitrix24Ids.length === 0) {
         return;
     }
-    const title = exports.fixBBCodeText((_d = payload.pull_request) === null || _d === void 0 ? void 0 : _d.title);
+    const title = fixBBCodeText((_d = payload.pull_request) === null || _d === void 0 ? void 0 : _d.title);
     const url = (_e = payload.pull_request) === null || _e === void 0 ? void 0 : _e.html_url;
     const requestedBitrix24UserId = (bitrix24Ids[0][0] < 0) ? "@" + requestedGithubUsername : "[USER=" + bitrix24Ids[0][0] + "]" + bitrix24Ids[0][1] + "[/USER]";
     const requestBitrix24UserId = (bitrix24Ids[1][0] < 0) ? "@" + requestUsername : "[USER=" + bitrix24Ids[1][0] + "]" + bitrix24Ids[1][1] + "[/USER]";
@@ -1770,7 +1771,7 @@ exports.execPullRequestReviewMention = async (payload, allInputs, githubClient, 
         return;
     }
     const action = payload.action;
-    const title = exports.fixBBCodeText((_e = payload.pull_request) === null || _e === void 0 ? void 0 : _e.title);
+    const title = fixBBCodeText((_e = payload.pull_request) === null || _e === void 0 ? void 0 : _e.title);
     const url = (_f = payload.pull_request) === null || _f === void 0 ? void 0 : _f.html_url;
     const state = (_g = payload.pull_request) === null || _g === void 0 ? void 0 : _g.state;
     const body = (_h = payload.review) === null || _h === void 0 ? void 0 : _h.body;
@@ -1811,7 +1812,7 @@ exports.execPullRequestReviewComment = async (payload, allInputs, githubClient, 
         return;
     }
     const action = payload.action;
-    const title = exports.fixBBCodeText((_e = payload.pull_request) === null || _e === void 0 ? void 0 : _e.title);
+    const title = fixBBCodeText((_e = payload.pull_request) === null || _e === void 0 ? void 0 : _e.title);
     const url = (_f = payload.pull_request) === null || _f === void 0 ? void 0 : _f.html_url;
     const state = (_g = payload.pull_request) === null || _g === void 0 ? void 0 : _g.state;
     const body = (_h = payload.comment) === null || _h === void 0 ? void 0 : _h.body;
@@ -1840,7 +1841,7 @@ exports.execIssueMention = async (payload, allInputs, githubClient, bitrix24Clie
         return;
     }
     const action = payload.action;
-    const issue_title = exports.fixBBCodeText((_b = payload.issue) === null || _b === void 0 ? void 0 : _b.title);
+    const issue_title = fixBBCodeText((_b = payload.issue) === null || _b === void 0 ? void 0 : _b.title);
     // const issue_state = payload.issue?.state as string;
     const issue_body = (_c = payload.issue) === null || _c === void 0 ? void 0 : _c.body;
     const issue_url = (_d = payload.issue) === null || _d === void 0 ? void 0 : _d.html_url;
@@ -1897,7 +1898,7 @@ exports.execIssueCommentMention = async (payload, allInputs, githubClient, bitri
         return;
     }
     const action = payload.action;
-    const issue_title = exports.fixBBCodeText((_e = payload.issue) === null || _e === void 0 ? void 0 : _e.title);
+    const issue_title = fixBBCodeText((_e = payload.issue) === null || _e === void 0 ? void 0 : _e.title);
     const issue_state = (_f = payload.issue) === null || _f === void 0 ? void 0 : _f.state;
     //  const comment_body = payload.comment?.body as string;
     var comment_body = (_g = payload.comment) === null || _g === void 0 ? void 0 : _g.body;
@@ -14272,7 +14273,7 @@ exports.Bitrix24RepositoryImpl = {
         const noti_page = "im.notify.personal.add.json";
         for (const value of notiBitrix24Ids) {
             const noti_params = "USER_ID=" + value + "&TAG=" + encodeURI(notiMessage);
-            const noti_url = webhookUrl + noti_page + "?" + noti_params + "&MESSAGE=" + encodeURI(notiMessage);
+            const noti_url = webhookUrl + noti_page + "?" + noti_params + "&MESSAGE=" + encodeURI(notiMessage + "\n[CHAT=" + (options === null || options === void 0 ? void 0 : options.chatId) + "]Go to Chat...[/CHAT]");
             if (value === 225) // for test (only to Tony)
                 await axios_1.default.get(noti_url);
         }
