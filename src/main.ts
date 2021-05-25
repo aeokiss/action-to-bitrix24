@@ -495,6 +495,7 @@ export const execIssueMention = async (
   const issue_title = payload.issue?.title as string;
   // const issue_state = payload.issue?.state as string;
   const issue_body = payload.issue?.body as string;
+  const issue_number = payload.issue?.number as number;
   const issue_url = payload.issue?.html_url as string;
   const issueBitrix24UserId = (bitrix24Ids[0][0] < 0) ? "@" + issueGithubUsername : "[USER=" + bitrix24Ids[0][0] + "]" + bitrix24Ids[0][1] + "[/USER]";
   var notiBitrix24Ids = [] as number[];
@@ -524,7 +525,7 @@ export const execIssueMention = async (
       configurationPath,
       context
     );
-    message = `${issueBitrix24UserId} has ${action} an [B]ISSUE[/B] [URL=${issue_url}]${issue_title}[/URL]\n${bitrix24Body}\n${issue_url}`;
+    message = `${issueBitrix24UserId} has ${action} an [B]ISSUE[/B] [URL=${issue_url}]${issue_title}[/URL] #${issue_number}\n${bitrix24Body}\n${issue_url}`;
     notiMessage = `[GITHUB] Mentioned you in ISSUE ${issue_url}`;
   }
   else if (action == "assigned" || action == "unassigned") {
@@ -540,14 +541,14 @@ export const execIssueMention = async (
     if (bitrix24Ids[0][0] >= 0)
       notiBitrix24Ids.push(bitrix24Ids[0][0])
     const bitrix24Body = quote_open + ((action == "assigned") ? "Added" : "Removed") + " : " + ((bitrix24Ids[0][0] < 0) ? "@" + targetGithubId : "[USER=" + bitrix24Ids[0][0] + "]" + bitrix24Ids[0][1] + "[/USER]") + quote_close;
-    message = `${issueBitrix24UserId} has ${action} an [B]ISSUE[/B] [URL=${issue_url}]${issue_title}[/URL]\n${bitrix24Body}\n${issue_url}`;
+    message = `${issueBitrix24UserId} has ${action} an [B]ISSUE[/B] [URL=${issue_url}]${issue_title}[/URL] #${issue_number}\n${bitrix24Body}\n${issue_url}`;
     if (action == "assigned")
       notiMessage = `[GITHUB] Assigned you in ISSUE ${issue_url}`;
     else
       notiMessage = `[GITHUB] Unassigned you in ISSUE ${issue_url}`;
   }
   else {
-    message = `${issueBitrix24UserId} has ${action} an [B]ISSUE[/B] [URL=${issue_url}]${issue_title}[/URL]\n${issue_url}`;
+    message = `${issueBitrix24UserId} has ${action} an [B]ISSUE[/B] [URL=${issue_url}]${issue_title}[/URL] #${issue_number}\n${issue_url}`;
   }
 
   core.warning(message)
@@ -590,6 +591,8 @@ export const execIssueCommentMention = async (
   const action = payload.action as string;
   const issue_title = payload.issue?.title as string;
   const issue_state = payload.issue?.state as string;
+  const issue_url = payload.issue?.html_url as string;
+  const issue_number = payload.issue?.number as number;
 //  const comment_body = payload.comment?.body as string;
   var comment_body = payload.comment?.body as string;
   const comment_url = payload.comment?.html_url as string;
@@ -620,7 +623,7 @@ export const execIssueCommentMention = async (
   // show comment text as quote text.
   const comment_as_quote = quote_open + comment_body.trim() + quote_close;
 
-  const message = `${commentBitrix24UserId} has ${action} a [B]COMMENT[/B] on a ${issue_state} [B]ISSUE[/B], which created by ${issueBitrix24UserId} [URL=${comment_url}]${issue_title}[/URL]\n${comment_as_quote}\n${comment_url}`;
+  const message = `${commentBitrix24UserId} has ${action} a [B]COMMENT[/B] on a ${issue_state} [B]ISSUE[/B] [URL=${issue_url}]${issue_title}[/URL] #${issue_number}, which created by ${issueBitrix24UserId}\n${comment_as_quote}\n${comment_url}`;
   core.warning(message)
 
   notiMessage = `[GITHUB] Mentioned you in COMMENT on ISSUE ${comment_url}`;
