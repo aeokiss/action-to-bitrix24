@@ -84,7 +84,7 @@ export const Bitrix24RepositoryImpl = {
     const chatPage = "im.message.add.json";
 //    const chat_params = "CHAT_ID=" + options?.chatId + "&URL_PREVIEW=N&SYSTEM=N";
     const chatParams = "CHAT_ID=" + options?.chatId + "&URL_PREVIEW=N";
-    const chatUrl = webhookUrl + chatPage + "?" + chatParams + "&MESSAGE=" + encodeURI("[B]" + botName + "[/B]\n" + message);
+    const chatUrl = webhookUrl + chatPage + "?" + chatParams + "&MESSAGE=" + encodeURIComponent("[B]" + botName + "[/B]\n" + message);
     await axios.get(chatUrl);
 
     // send notification
@@ -93,7 +93,7 @@ export const Bitrix24RepositoryImpl = {
       const notiTag = "GITHUB" + Date.now();
       const notiParams = "USER_ID=" + value + "&TAG=" + notiTag;
 //      const notiParams = "USER_ID=" + value;
-      const notiUrl = webhookUrl + notiPage + "?" + notiParams + "&MESSAGE=" + encodeURI(notiMessage + "\n[CHAT=" + options?.chatId + "]Go to Chat[/CHAT]");
+      const notiUrl = webhookUrl + notiPage + "?" + notiParams + "&MESSAGE=" + encodeURIComponent(notiMessage + "\n[CHAT=" + options?.chatId + "]Go to Chat[/CHAT]");
 //      if (value === 225) // for test (only to Tony)
       await axios.get(notiUrl);
     };
