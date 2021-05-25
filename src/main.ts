@@ -52,21 +52,6 @@ export const convertToBitrix24Username = async (
 const quote_open = "------------------------------------------------------\n";
 const quote_close = "\n------------------------------------------------------";
 
-function fixBBCodeText(input: string) {
-  const mask = [
-    // 아래 코드가 들어갈 경우 문장이 깨지는 경우가 있어서 특수문자로 변환
-    ["[", "［"], // [
-    ["]", "］"], // ]
-    ["&", "＆"], // &
-    ["#", "＃"] // #
-  ];
-  var output = input;
-  mask.forEach(value => {
-    output = output.split(value[0]).join(value[1]);
-  });
-  return output;
-};
-
 export const markdownToBitrix24Body = async (
   markdown: string,
   githubClient: typeof GithubRepositoryImpl,
@@ -90,12 +75,7 @@ export const markdownToBitrix24Body = async (
     ["- [x] ", "- ☑ "], // check box (checked)
 //    ["_", ""], // italic
     ["*", ""], // italic
-    ["> ", "| "], // blockquote
-    // 아래 코드가 들어갈 경우 문장이 깨지는 경우가 있어서 특수문자로 변환
-    ["[", "［"], // [
-    ["]", "］"], // ]
-    ["&", "＆"], // &
-    ["#", "＃"] // #
+    ["> ", "| "] // blockquote
   ];
 
   mask.forEach(value => {
@@ -153,14 +133,16 @@ export const execPullRequestMention = async (
   }
 
   const action = payload.action;
-  const title = fixBBCodeText(payload.pull_request?.title);
+  const title = payload.pull_request?.title;
   const url = payload.pull_request?.html_url;
   const pull_request_body = payload.pull_request?.body as string;
   const changed_files = payload.pull_request?.changed_files as number;
   const commits = payload.pull_request?.commits as number;
   const merged = payload.pull_request?.merged as boolean;
   const pull_request_number = payload.pull_request?.number as number;
-  // fixed for mobile app
+  const pr_from = payload.pull_request?.head?.ref as string;
+  const pr_into = payload.pull_request?.base?.ref as string;
+// fixed for mobile app
   const prBitrix24UserId = (bitrix24Ids[0][0] < 0) ? "@" + pullRequestGithubUsername : "[USER=" + bitrix24Ids[0][0] + "]" + bitrix24Ids[0][1] + "[/USER]";
 
   var message = "";
@@ -168,8 +150,6 @@ export const execPullRequestMention = async (
   var notiMessage = "";
 
   if (action === "opened" || action === "edited") {
-    const pr_from = fixBBCodeText(payload.pull_request?.head?.ref as string);
-    const pr_into = fixBBCodeText(payload.pull_request?.base?.ref as string);
     const body = (pull_request_body.length > 0) ? pull_request_body : "No description provided.";
     var pr_info = quote_open;
     pr_info += ((changed_files > 1) ? "Changed files" : "Changed file") + " : " + changed_files.toString();
@@ -215,7 +195,7 @@ export const execPullRequestMention = async (
     if (bitrix24Ids[0][0] >= 0)
       notiBitrix24Ids.push(bitrix24Ids[0][0])
     const bitrix24Body = quote_open + ((action == "assigned") ? "Added" : "Removed") + " : " + ((bitrix24Ids[0][0] < 0) ? "@" + targetGithubId : "[USER=" + bitrix24Ids[0][0] + "]" + bitrix24Ids[0][1] + "[/USER]") + quote_close;
-    message = `${prBitrix24UserId} has ${action} [B]PULL REQUEST[/B] [URL=${url}]${title}[/URL] ＃${pull_request_number}\n${bitrix24Body}\n${url}`;
+    message = `${prBitrix24UserId} has ${action} [B]PULL REQUEST[/B] into [I]${pr_into}[/I] from [I]${pr_from}[/I] [URL=${url}]${title}[/URL] ＃${pull_request_number}\n${bitrix24Body}\n${url}`;
     if (action == "assigned")
       notiMessage = `[GITHUB] Assigned you in PULL REQUEST ${url}`;
     else
@@ -223,8 +203,6 @@ export const execPullRequestMention = async (
   }
   else if (action == "closed") {
     if (merged == true) { // the pull request was merged.
-      const pr_from = fixBBCodeText(payload.pull_request?.head?.ref as string);
-      const pr_into = fixBBCodeText(payload.pull_request?.base?.ref as string);
       var pr_info = quote_open;
       pr_info += ((changed_files > 1) ? "Changed files" : "Changed file") + " : " + changed_files.toString();
       pr_info += ", ";
@@ -233,11 +211,11 @@ export const execPullRequestMention = async (
       message = `${prBitrix24UserId} has merged [B]PULL REQUEST[/B] into [I]${pr_into}[/I] from [I]${pr_from}[/I] [URL=${url}]${title}[/URL] ＃${pull_request_number}\n${pr_info}\n${url}`;
     }
     else { // the pull request was closed with unmerged commits.
-      message = `${prBitrix24UserId} has ${action} [B]PULL REQUEST[/B] with unmerged commits [URL=${url}]${title}[/URL] ＃${pull_request_number}\n${url}`;
+      message = `${prBitrix24UserId} has ${action} [B]PULL REQUEST[/B] with unmerged commits into [I]${pr_into}[/I] from [I]${pr_from}[/I] [URL=${url}]${title}[/URL] ＃${pull_request_number}\n${url}`;
     }
   }
   else {
-    message = `${prBitrix24UserId} has ${action} [B]PULL REQUEST[B] [URL=${url}]${title}[/URL] ＃${pull_request_number}\n${url}`;
+    message = `${prBitrix24UserId} has ${action} [B]PULL REQUEST[B] into [I]${pr_into}[/I] from [I]${pr_from}[/I] [URL=${url}]${title}[/URL] ＃${pull_request_number}\n${url}`;
   }
 
   console.log(message);
@@ -278,10 +256,10 @@ export const execPrReviewRequestedCommentMention = async (
   }
 
   const action = payload.action as string;
-  const pr_title = fixBBCodeText(payload.issue?.title as string);
+  const pr_title = payload.issue?.title as string;
   const pr_state = payload.issue?.state as string;
 //  const comment_body = payload.comment?.body as string;
-  var comment_body = fixBBCodeText(payload.comment?.body as string);
+  var comment_body = payload.comment?.body as string;
   const comment_url = payload.comment?.html_url as string;
   const commentBitrix24UserId = (bitrix24Ids[0][0] < 0) ? "@" + commentGithubUsername : "[USER=" + bitrix24Ids[0][0] + "]" + bitrix24Ids[0][1] + "[/USER]";
   const pullRequestedBitrix24UserId = (bitrix24Ids[1][0] < 0) ? "@" + pullRequestedGithubUsername : "[USER=" + bitrix24Ids[1][0] + "]" + bitrix24Ids[1][1] + "[/USER]";
@@ -310,7 +288,7 @@ export const execPrReviewRequestedCommentMention = async (
   // show comment text as quote text.
   const comment_as_quote = quote_open + comment_body.trim() + quote_close;
 
-  const message = `${commentBitrix24UserId} has ${action} a [B]COMMENT[/B] on a ${pr_state} [B]PULL REQUEST[/B] ${pullRequestedBitrix24UserId} ${pr_title}\n${comment_as_quote}\n${comment_url}`;
+  const message = `${commentBitrix24UserId} has ${action} a [B]COMMENT[/B] on a ${pr_state} [B]PULL REQUEST[/B], which created by ${pullRequestedBitrix24UserId} [URL=${comment_url}]${pr_title}[/URL]\n${comment_as_quote}\n${comment_url}`;
   core.warning(message)
 
   notiMessage = `[GITHUB] Mentioned you in COMMENT on PULL REQUEST ${comment_url}`;
@@ -351,7 +329,7 @@ export const execPrReviewRequestedMention = async (
     return;
   }
 
-  const title = fixBBCodeText(payload.pull_request?.title);
+  const title = payload.pull_request?.title;
   const url = payload.pull_request?.html_url;
   const requestedBitrix24UserId = (bitrix24Ids[0][0] < 0) ? "@" + requestedGithubUsername : "[USER=" + bitrix24Ids[0][0] + "]" + bitrix24Ids[0][1] + "[/USER]";
   const requestBitrix24UserId = (bitrix24Ids[1][0] < 0) ? "@" + requestUsername : "[USER=" + bitrix24Ids[1][0] + "]" + bitrix24Ids[1][1] + "[/USER]";
@@ -400,7 +378,7 @@ export const execPullRequestReviewMention = async (
   }
 
   const action = payload.action as string;
-  const title = fixBBCodeText(payload.pull_request?.title as string);
+  const title = payload.pull_request?.title as string;
   const url = payload.pull_request?.html_url as string;
   const state = payload.pull_request?.state as string;
   const body = payload.review?.body as string;
@@ -467,7 +445,7 @@ export const execPullRequestReviewComment = async (
   }
 
   const action = payload.action as string;
-  const title = fixBBCodeText(payload.pull_request?.title as string);
+  const title = payload.pull_request?.title as string;
   const url = payload.pull_request?.html_url as string;
   const state = payload.pull_request?.state as string;
   const body = payload.comment?.body as string;
@@ -514,7 +492,7 @@ export const execIssueMention = async (
   }
 
   const action = payload.action as string;
-  const issue_title = fixBBCodeText(payload.issue?.title as string);
+  const issue_title = payload.issue?.title as string;
   // const issue_state = payload.issue?.state as string;
   const issue_body = payload.issue?.body as string;
   const issue_url = payload.issue?.html_url as string;
@@ -610,10 +588,10 @@ export const execIssueCommentMention = async (
   }
 
   const action = payload.action as string;
-  const issue_title = fixBBCodeText(payload.issue?.title as string);
+  const issue_title = payload.issue?.title as string;
   const issue_state = payload.issue?.state as string;
 //  const comment_body = payload.comment?.body as string;
-  var comment_body = fixBBCodeText(payload.comment?.body as string);
+  var comment_body = payload.comment?.body as string;
   const comment_url = payload.comment?.html_url as string;
   const commentBitrix24UserId = (bitrix24Ids[0][0] < 0) ? "@" + commentGithubUsername : "[USER=" + bitrix24Ids[0][0] + "]" + bitrix24Ids[0][1] + "[/USER]";
   const issueBitrix24UserId = (bitrix24Ids[1][0] < 0) ? "@" + issueGithubUsername : "[USER=" + bitrix24Ids[1][0] + "]" + bitrix24Ids[1][1] + "[/USER]";
@@ -642,7 +620,7 @@ export const execIssueCommentMention = async (
   // show comment text as quote text.
   const comment_as_quote = quote_open + comment_body.trim() + quote_close;
 
-  const message = `${commentBitrix24UserId} has ${action} a [B]COMMENT[/B] on a ${issue_state} [B]ISSUE[/B] ${issueBitrix24UserId} ${issue_title}\n${comment_as_quote}\n${comment_url}`;
+  const message = `${commentBitrix24UserId} has ${action} a [B]COMMENT[/B] on a ${issue_state} [B]ISSUE[/B], which created by ${issueBitrix24UserId} [URL=${comment_url}]${issue_title}[/URL]\n${comment_as_quote}\n${comment_url}`;
   core.warning(message)
 
   notiMessage = `[GITHUB] Mentioned you in COMMENT on ISSUE ${comment_url}`;
