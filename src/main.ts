@@ -179,7 +179,7 @@ export const execPullRequestMention = async (
       configurationPath,
       context
     );
-    message = `${prBitrix24UserId} has ${action} [B]PULL REQUEST[/B] into [I]${pr_into}[/I] from [I]${pr_from}[/I] [URL=${url}]${title}[/URL] ＃${pull_request_number}\n${pr_info}\n${bitrix24Body}\n${url}`;
+    message = `${prBitrix24UserId} has ${action} [B]PULL REQUEST[/B] into [I]${pr_into}[/I] from [I]${pr_from}[/I] [URL=${url}]${title}[/URL] #${pull_request_number}\n${pr_info}\n${bitrix24Body}\n${url}`;
     notiMessage = `[GITHUB] Mentioned you in PULL REQUEST ${url}`;
   }
   else if (action == "assigned" || action == "unassigned") {
@@ -195,7 +195,7 @@ export const execPullRequestMention = async (
     if (bitrix24Ids[0][0] >= 0)
       notiBitrix24Ids.push(bitrix24Ids[0][0])
     const bitrix24Body = quote_open + ((action == "assigned") ? "Added" : "Removed") + " : " + ((bitrix24Ids[0][0] < 0) ? "@" + targetGithubId : "[USER=" + bitrix24Ids[0][0] + "]" + bitrix24Ids[0][1] + "[/USER]") + quote_close;
-    message = `${prBitrix24UserId} has ${action} [B]PULL REQUEST[/B] into [I]${pr_into}[/I] from [I]${pr_from}[/I] [URL=${url}]${title}[/URL] ＃${pull_request_number}\n${bitrix24Body}\n${url}`;
+    message = `${prBitrix24UserId} has ${action} [B]PULL REQUEST[/B] into [I]${pr_into}[/I] from [I]${pr_from}[/I] [URL=${url}]${title}[/URL] #${pull_request_number}\n${bitrix24Body}\n${url}`;
     if (action == "assigned")
       notiMessage = `[GITHUB] Assigned you in PULL REQUEST ${url}`;
     else
@@ -208,14 +208,14 @@ export const execPullRequestMention = async (
       pr_info += ", ";
       pr_info += ((commits > 1) ? "Commits" : "Commit") + " : " + commits.toString();
       pr_info += quote_close;
-      message = `${prBitrix24UserId} has merged [B]PULL REQUEST[/B] into [I]${pr_into}[/I] from [I]${pr_from}[/I] [URL=${url}]${title}[/URL] ＃${pull_request_number}\n${pr_info}\n${url}`;
+      message = `${prBitrix24UserId} has merged [B]PULL REQUEST[/B] into [I]${pr_into}[/I] from [I]${pr_from}[/I] [URL=${url}]${title}[/URL] #${pull_request_number}\n${pr_info}\n${url}`;
     }
     else { // the pull request was closed with unmerged commits.
-      message = `${prBitrix24UserId} has ${action} [B]PULL REQUEST[/B] with unmerged commits into [I]${pr_into}[/I] from [I]${pr_from}[/I] [URL=${url}]${title}[/URL] ＃${pull_request_number}\n${url}`;
+      message = `${prBitrix24UserId} has ${action} [B]PULL REQUEST[/B] with unmerged commits into [I]${pr_into}[/I] from [I]${pr_from}[/I] [URL=${url}]${title}[/URL] #${pull_request_number}\n${url}`;
     }
   }
   else {
-    message = `${prBitrix24UserId} has ${action} [B]PULL REQUEST[B] into [I]${pr_into}[/I] from [I]${pr_from}[/I] [URL=${url}]${title}[/URL] ＃${pull_request_number}\n${url}`;
+    message = `${prBitrix24UserId} has ${action} [B]PULL REQUEST[B] into [I]${pr_into}[/I] from [I]${pr_from}[/I] [URL=${url}]${title}[/URL] #${pull_request_number}\n${url}`;
   }
 
   console.log(message);
