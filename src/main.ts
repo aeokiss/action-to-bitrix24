@@ -215,7 +215,7 @@ export const execPullRequestMention = async (
     }
   }
   else {
-    message = `${prBitrix24UserId} has ${action} [B]PULL REQUEST[B] into [I]${pr_into}[/I] from [I]${pr_from}[/I] [URL=${url}]${title}[/URL] #${pull_request_number}\n${url}`;
+    message = `${prBitrix24UserId} has ${action} [B]PULL REQUEST[/B] into [I]${pr_into}[/I] from [I]${pr_from}[/I] [URL=${url}]${title}[/URL] #${pull_request_number}\n${url}`;
   }
 
   console.log(message);
