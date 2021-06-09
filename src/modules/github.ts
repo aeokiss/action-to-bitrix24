@@ -21,6 +21,10 @@ const acceptActionTypes = {
   pull_request: ["opened", "edited", "closed", "review_requested", "assigned", "unassigned"],
   pull_request_review: ["submitted"],
   pull_request_review_comment: ["created", "edited"],
+/* test for kanban board
+  project_card: ["created", "edited", "moved", "converted", "deleted"],
+  project_column: ["created", "edited", "moved", "deleted"],
+*/
 };
 
 const buildError = (payload: unknown): Error => {
